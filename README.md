@@ -2,6 +2,30 @@
 
 `ac-game` 是一个基于 Next.js、React、Three.js 构建的网页游戏平台。玩家以本地游客身份进入大厅，可以直接游玩动作、益智、音乐、经营和休闲类小游戏，并在浏览器中保存最高分与排行榜数据。
 
+**在线游玩：** [https://game.acgay.cn](https://game.acgay.cn)
+
+<p align="center">
+  <a href="https://game.acgay.cn">
+    <img src="docs/screenshots/platform-lobby.jpg" alt="狗耳GAME 游戏大厅" width="100%">
+  </a>
+</p>
+
+## 游戏截图
+
+<table>
+  <tr>
+    <td width="50%"><strong>永夜幸存者</strong><br><img src="docs/screenshots/nightfall-survivors.jpg" alt="永夜幸存者职业选择界面"></td>
+    <td width="50%"><strong>石油大亨</strong><br><img src="docs/screenshots/oil-tycoon.jpg" alt="石油大亨油田经营界面"></td>
+  </tr>
+  <tr>
+    <td width="50%"><strong>合成大 Saber</strong><br><img src="docs/screenshots/planet-merge.jpg" alt="合成大 Saber 游戏界面"></td>
+    <td width="50%"><strong>贵阳捉鸡麻将</strong><br><img src="docs/screenshots/guiyang-mahjong.jpg" alt="贵阳捉鸡麻将牌桌"></td>
+  </tr>
+  <tr>
+    <td colspan="2"><strong>人机围棋</strong><br><img src="docs/screenshots/go-game.jpg" alt="九路人机围棋棋盘"></td>
+  </tr>
+</table>
+
 ## 当前能力
 
 - 统一游戏大厅、分类、搜索、最近游玩和排行榜。
@@ -88,3 +112,13 @@ Woodpecker 需要配置以下仓库 Secrets：
 ## 素材
 
 项目使用自制素材、AI 生成素材和允许再分发的免费素材。新增素材时需同时记录来源、作者和许可证，并遵循 `docs/GAME_DEVELOPMENT_STANDARD.md` 中的素材规范。
+
+## 授权与版权
+
+Copyright (c) 2026 ac-game contributors.
+
+- 项目源代码采用 [MIT License](LICENSE)，允许个人及商业项目使用、修改、分发和再授权，但需保留版权与许可声明。
+- 项目自制且不包含第三方知识产权的美术和音频素材允许用于商业项目；AI 生成素材还需遵守对应生成服务的使用条款。
+- Kenney 与 LordNeo 素材采用 CC0；DawnLike 衍生素材采用 CC BY 4.0；16Pixel 素材采用 CC BY-SA 4.0。使用时必须遵循各素材目录中的 `LICENSE.txt`，履行署名及相同方式共享等要求。
+- Fate、Saber 等角色名称、形象、商标及其他第三方知识产权归原权利人所有，不包含在本项目的 MIT 商用授权中。商业发行前必须替换相关素材或取得权利人的明确授权。
+- MIT License 不授予“狗耳GAME”名称、标识或任何第三方商标的使用权。
