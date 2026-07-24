@@ -1,0 +1,8 @@
+Archer [Static] [64x64]
+
+Author: LordNeo
+Source: https://opengameart.org/content/archer-static-64x64
+Asset: archer_elf.png
+
+License: Creative Commons Zero (CC0 1.0 Universal)
+https://creativecommons.org/publicdomain/zero/1.0/

@@ -1,0 +1,107 @@
+.game{position:relative;width:100%;height:100%;overflow:hidden;background:#090b19;color:#fff;font-family:Inter,"PingFang SC",sans-serif}
+.canvas{display:block;width:100%;height:100%}
+.hud{position:absolute;z-index:4;inset:14px 18px auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;pointer-events:none;text-shadow:0 2px 9px #000}
+.health{display:grid;grid-template-columns:auto minmax(90px,170px) auto;align-items:center;gap:7px;width:max-content}
+.health>span{color:#ff8fae;font-size:8px;font-weight:900;letter-spacing:.12em}
+.health>i{height:8px;padding:2px;border:1px solid #ffffff2b;border-radius:10px;background:#130f21}
+.health>i b{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#cf416a,#ff829f);box-shadow:0 0 8px #ff5984}
+.health>strong{font-size:9px}
+.health>em{grid-column:2;padding-top:2px;color:#ffd56a;font-size:6px;font-style:normal;letter-spacing:.12em}
+.timer{text-align:center;display:flex;flex-direction:column}
+.timer strong{font-family:Georgia,serif;font-size:24px}
+.timer span{color:#ffffff72;font-size:7px;letter-spacing:.14em}
+.build{justify-self:end;display:flex;max-width:330px;flex-wrap:wrap;justify-content:flex-end;gap:4px}
+.build>span{position:relative;width:28px;height:28px;border:1px solid #ffffff27;border-radius:7px;background:#17142bba;display:grid;place-items:center;color:#d8c8ff;font-size:14px}
+.build>span.evolved{border-color:#ffd568;box-shadow:0 0 11px #ffce6252;color:#ffe58f}
+.build small{position:absolute;right:2px;bottom:1px;color:#fff;font-size:6px}
+.xp{position:absolute;z-index:4;top:0;left:0;right:0;height:4px;background:#ffffff0c}
+.xp span{display:block;height:100%;background:linear-gradient(90deg,#5fd9ff,#976dff,#ee6cb7);box-shadow:0 0 8px #9a6fff}
+.xp b{position:absolute;right:8px;top:7px;color:#ffffff65;font-size:6px;font-weight:500}
+.boss{position:absolute;z-index:4;top:62px;left:50%;width:min(380px,68%);transform:translateX(-50%);display:grid;gap:4px;text-align:center}
+.boss span{color:#ff7694;font-size:7px;font-weight:900;letter-spacing:.2em}
+.boss i{height:8px;border:1px solid #ff6e8d66;border-radius:8px;padding:2px;background:#140d1b}
+.boss b{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#9d3a69,#ff6c7d)}
+.tarotStack{position:absolute;z-index:4;left:16px;top:70px;display:flex;gap:4px}
+.tarotStack span{width:27px;height:38px;border:1px solid #e0bdff66;border-radius:4px;background:#1c1430d9;display:grid;place-items:center;color:#e5c4ff;font-family:Georgia,serif;font-size:9px}
+.buff{position:absolute;z-index:4;left:50%;top:94px;transform:translateX(-50%);padding:4px 8px;border-radius:12px;background:#ffd46426;color:#ffe493;font-size:7px}
+.touchPad{position:absolute;z-index:5;left:17px;bottom:17px;width:126px;height:126px;display:grid;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(3,42px);opacity:.25}
+.touchPad:hover{opacity:1}
+.touchPad button{border:1px solid #ffffff35;background:#17132dab;color:white;touch-action:none}
+.touchPad button:nth-child(1){grid-column:2}
+.touchPad button:nth-child(2){grid-column:1;grid-row:2}
+.touchPad button:nth-child(3){grid-column:2;grid-row:3}
+.touchPad button:nth-child(4){grid-column:3;grid-row:2}
+.notice{position:absolute;z-index:12;left:50%;top:18%;transform:translateX(-50%);padding:11px 20px;border:1px solid #d9b2ff54;border-radius:8px;background:#171128e8;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 13px 35px #0008;animation:notice 2.6s ease forwards;pointer-events:none}
+.notice strong{color:#ffe089;font-family:Georgia,"Songti SC",serif;font-size:18px}
+.notice span{color:#ffffff96;font-size:8px}
+.intro,.choiceOverlay,.result{position:absolute;z-index:10;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 44%,#352458e8,#0b0b1df5 63%);text-align:center}
+.intro::before{content:"";position:absolute;inset:0;background-image:radial-gradient(#d5c4ff40 1px,transparent 1px);background-size:36px 36px;mask-image:radial-gradient(circle,#000,transparent 72%)}
+.kicker{position:relative;color:#c695ff;font-size:8px;font-weight:800;letter-spacing:.22em}
+.intro h3{position:relative;margin:7px 0 4px;font-family:Georgia,"Songti SC",serif;font-size:45px;font-weight:400}
+.intro h3 span{color:#d398ff}
+.intro>p{position:relative;margin:0 20px 18px;color:#ffffff83;font-size:9px}
+.characters{position:relative;width:min(760px,88%);display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.characters>button{min-width:0;padding:16px 13px;border:1px solid #ffffff18;border-radius:12px;background:#ffffff07;color:white;display:flex;gap:11px;text-align:left;cursor:pointer;transition:.2s}
+.characters>button.selected{border-color:#c47bff;background:#9b5de51c;box-shadow:0 0 0 2px #a85fff22,inset 0 1px #fff2}
+.characters>button>i{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:#2a2042;color:#e0bdff;font-family:Georgia,serif;font-size:22px;font-style:normal;flex:none}
+.characters span{min-width:0;display:flex;flex-direction:column}
+.characters strong{font-family:Georgia,"Songti SC",serif;font-size:15px}
+.characters small{margin:2px 0 7px;color:#a98dc7;font-size:7px}
+.characters em{color:#ffd681;font-size:7px;font-style:normal}
+.characters p{margin:5px 0 0;color:#ffffff69;font-size:7px;line-height:1.5}
+.classIntro{position:relative;width:min(760px,88%);margin-top:10px;padding:9px 12px;border:1px solid #c98bff38;border-radius:10px;background:linear-gradient(135deg,#1e1734d9,#110e22d9);display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:6px 13px;text-align:left;box-shadow:inset 0 1px #ffffff0b}
+.classIntro>span{grid-row:1/3;padding:5px 9px;border-right:1px solid #c98bff35;color:#d6a4ff;font-size:7px;font-weight:900;letter-spacing:.14em;writing-mode:vertical-rl}
+.classIntro>div{display:flex;align-items:center;gap:9px}
+.classIntro strong{font-family:Georgia,"Songti SC",serif;font-size:12px}
+.classIntro em{padding:2px 6px;border-radius:9px;background:#bd75ff1d;color:#d9b4ff;font-size:7px;font-style:normal}
+.classIntro p{grid-column:3;margin:0;color:#ffffffa0;font-size:8px;line-height:1.55}
+.classIntro small{grid-column:2;color:#85e9c1;font-size:7px}
+.classIntro b{grid-column:3;color:#ffdb85;font-size:7px;font-weight:600}
+.start,.result button{position:relative;margin-top:12px;min-width:145px;height:41px;border:0;border-radius:7px;background:linear-gradient(135deg,#f3d27d,#d68bff);color:#1a1226;font-size:10px;font-weight:900;cursor:pointer;box-shadow:0 10px 28px #0007}
+.hint{position:relative;margin-top:8px;color:#ffffff56;font-size:7px}
+.choiceOverlay{z-index:11;background:#0c0917dc;backdrop-filter:blur(8px)}
+.choiceOverlay>span{color:#d4a6ff;font-size:8px;font-weight:900;letter-spacing:.25em}
+.choiceOverlay h3{margin:7px 0 18px;font-family:Georgia,"Songti SC",serif;font-size:29px;font-weight:400}
+.upgradeCards{width:min(760px,88%);display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.upgradeCards button{min-height:150px;padding:16px;border:1px solid #ffffff1e;border-radius:12px;background:linear-gradient(150deg,#27203f,#151226);color:white;display:flex;gap:13px;text-align:left;cursor:pointer;transition:.2s}
+.upgradeCards button:hover{transform:translateY(-5px);border-color:#c88aff;box-shadow:0 14px 35px #0008}
+.upgradeCards>button>i{width:48px;height:48px;border-radius:11px;background:#a15be62b;display:grid;place-items:center;color:#e7c3ff;font-size:25px;font-style:normal;flex:none}
+.upgradeCards span{display:flex;flex-direction:column}
+.upgradeCards small{color:#9f83bd;font-size:7px}
+.upgradeCards strong{margin:4px 0 2px;font-family:Georgia,"Songti SC",serif;font-size:16px}
+.upgradeCards em{color:#ffd571;font-size:8px;font-style:normal}
+.upgradeCards p{margin:10px 0 0;color:#ffffff78;font-size:8px;line-height:1.55}
+.tarotOverlay{background:radial-gradient(circle,#3b2052e8,#080712f5 65%)}
+.tarotCards{width:min(680px,86%);display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.tarotCards button{min-height:235px;padding:16px;border:1px solid #d6a7ff5c;border-radius:13px;background:linear-gradient(160deg,#2d1b46,#100d20);color:white;display:flex;flex-direction:column;align-items:center;cursor:pointer;box-shadow:inset 0 0 0 4px #ffffff08}
+.tarotCards small{color:#d8b2ff;font-family:Georgia,serif;font-size:13px}
+.tarotCards i{margin:22px 0;width:58px;height:58px;border:1px solid #d8b2ff65;border-radius:50%;display:grid;place-items:center;color:#ffe08d;font-size:30px;font-style:normal}
+.tarotCards strong{font-family:Georgia,"Songti SC",serif;font-size:18px}
+.tarotCards p{color:#ffffff79;font-size:8px;line-height:1.6}
+.result>span{color:#bd8ce4;font-size:8px;letter-spacing:.2em}
+.result h3{margin:8px 0;font-family:Georgia,"Songti SC",serif;font-size:31px;font-weight:400}
+.result>strong{color:#ffdd82;font-family:Georgia,serif;font-size:52px}
+.result p{color:#ffffff75;font-size:9px;line-height:1.7}
+@keyframes notice{0%{opacity:0;transform:translate(-50%,-8px)}
+12%,78%{opacity:1;transform:translate(-50%,0)}
+100%{opacity:0;transform:translate(-50%,-10px)}
+}
+@media(max-width:680px){.hud{inset:10px 10px auto;grid-template-columns:1fr auto}
+.timer{grid-column:2}
+.build{display:none}
+.health{grid-template-columns:auto 90px auto}
+.characters{grid-template-columns:1fr;max-height:220px;overflow:auto}
+.characters>button{padding:9px}
+.classIntro{grid-template-columns:auto 1fr;gap:5px 8px;padding:8px}
+.classIntro>span{grid-row:1/4}
+.classIntro>div,.classIntro p,.classIntro small,.classIntro b{grid-column:2}
+.classIntro p{font-size:7px}
+.classIntro b{display:none}
+.intro h3{font-size:37px}
+.upgradeCards{grid-template-columns:1fr;max-height:70vh;overflow:auto}
+.upgradeCards button{min-height:105px}
+.tarotCards{gap:6px}
+.tarotCards button{min-height:200px;padding:10px}
+.tarotCards i{margin:14px 0}
+.touchPad{opacity:.75;transform:scale(.86);transform-origin:bottom left}
+}

@@ -1,0 +1,11 @@
+.wrap { position: absolute; z-index: 6; left: 18px; top: 36px; width: max-content; display: grid; grid-template-columns: auto minmax(90px,170px) auto; align-items: center; gap: 7px; color: #fff; text-shadow: 0 2px 9px #000; pointer-events: none; }
+.wrap > span { color: #9fdcff; font-size: 8px; font-weight: 900; letter-spacing: .08em; }
+.wrap > i { display: block; height: 8px; padding: 2px; border: 1px solid #ffffff2b; border-radius: 10px; background: #130f21; }
+.wrap > i b { display: block; height: 100%; border-radius: 8px; background: linear-gradient(90deg,#5fd9ff,#976dff,#ee6cb7); box-shadow: 0 0 8px #9a6fff; transition: width .2s; }
+.wrap > strong { font-size: 9px; }
+.wrap > em { grid-column: 2; margin-top: -4px; color: #d9b9ff; font-size: 6px; font-style: normal; letter-spacing: .08em; }
+
+@media (max-width: 680px) {
+  .wrap { left: 10px; top: 33px; grid-template-columns: auto 90px auto; }
+  .wrap > em { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}

@@ -1,0 +1,25 @@
+.combo {
+  position: absolute;
+  z-index: 7;
+  left: 158px;
+  bottom: 24px;
+  width: 112px;
+  padding: 8px 10px;
+  border: 1px solid #b786ff5c;
+  border-radius: 10px;
+  background: #171126d9;
+  box-shadow: 0 8px 24px #0007, 0 0 18px #9e69ff24;
+  pointer-events: none;
+  backdrop-filter: blur(7px);
+}
+.combo > span { color: #cda8ff; font-size: 6px; font-weight: 900; letter-spacing: .2em; }
+.combo strong { display: block; margin: 1px 0 4px; color: #fff; font-family: Georgia, serif; font-size: 22px; line-height: 1; }
+.combo strong small { margin-left: 5px; color: #ffffff7d; font-family: inherit; font-size: 7px; }
+.combo i { display: block; height: 4px; overflow: hidden; border-radius: 5px; background: #ffffff12; }
+.combo i b { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#9d65f3,#ef75c8); transition: width .08s linear; }
+.combo em { display: block; margin-top: 5px; color: #ffe0a1; font-size: 5px; font-style: normal; white-space: nowrap; }
+.fever { border-color: #ffd46e9c; background: linear-gradient(135deg,#492331e8,#211528e8); box-shadow: 0 0 28px #ff9d4963; animation: fever .55s ease-in-out infinite alternate; }
+.fever > span,.fever strong { color: #ffd973; text-shadow: 0 0 10px #ff874f; }
+.fever i b { background: linear-gradient(90deg,#ff755e,#ffd45e,#fff3ae); box-shadow: 0 0 9px #ffc14f; }
+@keyframes fever { to { transform: translateY(-2px); box-shadow: 0 0 36px #ff9d497d; } }
+@media(max-width:760px){.combo{left:10px;bottom:145px;width:92px}.combo em{display:none}}

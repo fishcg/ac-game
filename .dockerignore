@@ -1,0 +1,17 @@
+.git
+.github
+.idea
+node_modules
+.next
+out
+tmp
+.DS_Store
+*.log
+*.tsbuildinfo
+.env*
+!.env.example
+AGENTS.md
+README.md
+k8s.yaml
+.woodpecker.yml
+Dockerfile

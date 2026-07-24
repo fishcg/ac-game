@@ -1,0 +1,25 @@
+.game { position: relative; width: 100%; height: 100%; overflow: hidden; color: #fff; font-family: Inter, sans-serif; user-select: none; }
+.topbar { position: absolute; z-index: 8; top: 16px; left: 18px; right: 18px; display: flex; align-items: center; gap: 10px; pointer-events: none; }
+.stat { min-width: 86px; padding: 8px 11px; border: 1px solid #ffffff2e; border-radius: 7px; background: #15151ac7; box-shadow: 0 5px 16px #0003; }
+.stat small { display: block; color: #ffffff9b; font-size: 7px; letter-spacing: .1em; }
+.stat strong { display: block; margin-top: 2px; font-family: Georgia, serif; font-size: 18px; line-height: 1; }
+.pause { margin-left: auto; width: 38px; height: 38px; border: 1px solid #ffffff3d; border-radius: 50%; background: #15151ac7; color: #fff; cursor: pointer; pointer-events: auto; }
+.overlay { position: absolute; z-index: 20; inset: 0; display: grid; place-items: center; padding: 24px; background: #11131bd9; backdrop-filter: blur(5px); text-align: center; }
+.panel { width: min(430px, 90%); }
+.mark { display: block; margin-bottom: 10px; font-size: 42px; }
+.panel h3 { margin: 0 0 8px; font-family: Georgia,"Songti SC",serif; font-size: 31px; font-weight: 500; }
+.panel p { margin: 0 auto 20px; max-width: 370px; color: #ffffffb5; font-size: 11px; line-height: 1.7; }
+.primary { min-height: 42px; padding: 0 20px; border: 0; border-radius: 6px; background: #fff; color: #21231f; font-weight: 800; cursor: pointer; }
+.secondary { min-height: 36px; padding: 0 14px; border: 1px solid #ffffff3d; border-radius: 6px; background: #ffffff12; color: #fff; cursor: pointer; }
+.toast { position:absolute; z-index:12; left:50%; top:84px; transform:translateX(-50%); padding:8px 14px; border-radius:4px; background:#171512dc; font-size:11px; }
+.miner { background: linear-gradient(#56a7c8 0 27%,#9a653c 27% 31%,#513724 31% 100%); }
+.minerGround { position:absolute; inset:31% 0 0; background: repeating-linear-gradient(135deg,#4c3424 0 20px,#543a27 20px 40px); }
+.minerCabin { position:absolute; z-index:3; left:50%; top:12%; transform:translateX(-50%); font-size:62px; }
+.rope { position:absolute; z-index:4; left:50%; top:25%; width:3px; height:var(--rope); transform-origin:top; transform:rotate(var(--angle)); background:#e6d0a4; }
+.hook { position:absolute; left:50%; bottom:-18px; transform:translateX(-50%); font-size:24px; }
+.nugget { position:absolute; z-index:2; transform:translate(-50%,-50%); border:0; background:transparent; font-size:var(--size); filter:drop-shadow(0 5px 2px #0005); }
+.hamster { background:#a6d986; }
+.hamster canvas { width:100%!important; height:100%!important; }
+.laneControls { position:absolute; z-index:8; left:16px; right:16px; bottom:18px; display:flex; justify-content:space-between; pointer-events:none; }
+.laneControls button { width:58px; height:58px; border:1px solid #ffffff55; border-radius:50%; background:#19352299; color:#fff; font-size:22px; pointer-events:auto; backdrop-filter:blur(6px); }
+@media(max-width:760px){.topbar{top:10px;left:10px;right:10px}.stat{min-width:68px;padding:6px 8px}.stat strong{font-size:15px}}

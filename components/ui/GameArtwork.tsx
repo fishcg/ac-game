@@ -1,0 +1,31 @@
+/* eslint-disable @next/next/no-img-element */
+import type { GameInfo } from "@/config/games";
+
+export function GameArtwork({ type, compact = false }: { type: GameInfo["art"]; compact?: boolean }) {
+  return (
+    <div className={`game-art game-art--${type} ${compact ? "game-art--compact" : ""}`} aria-hidden="true">
+      <div className="art-grid" />
+      {type === "worm" && <><i className="worm-art-sun" /><i className="worm-art-hill wh-back" /><i className="worm-art-hill wh-front" /><i className="worm-art-crater" /><i className="worm-art-unit wu-green"><b /><b /></i><i className="worm-art-unit wu-red"><b /><b /></i><i className="worm-art-rocket" /><i className="worm-art-blast" /></>}
+      {type === "prism" && <><i className="prism-art-grid" /><i className="prism-art-cube"><b /><b /></i><i className="prism-art-spike ps-a" /><i className="prism-art-spike ps-b" /><i className="prism-art-orb" /><i className="prism-art-trail" /></>}
+      {type === "peg" && <><i className="peg-art-board" /><i className="peg-art-ball" /><i className="peg-art-node pn-a" /><i className="peg-art-node pn-b" /><i className="peg-art-node pn-c" /><i className="peg-art-node pn-d" /><i className="peg-art-burst">✦</i></>}
+      {type === "chamber" && <><i className="chamber-art-table" /><i className="chamber-art-device"><b /><b /><b /><b /><b /><b /></i><i className="chamber-art-core">✦</i><i className="chamber-art-card cc-a">◉</i><i className="chamber-art-card cc-b">⬡</i></>}
+      {type === "planetMerge" && <><i className="merge-art-stars" /><i className="merge-art-seal" /><i className="merge-art-bin" /><i className="merge-art-drop-line" /><img className="merge-art-avatar merge-art-saber" src="/assets/planet-merge/fate/artoria.webp" alt="" /><img className="merge-art-avatar merge-art-mash" src="/assets/planet-merge/fate/mash.webp" alt="" /><img className="merge-art-avatar merge-art-rin" src="/assets/planet-merge/fate/rin.webp" alt="" /><img className="merge-art-avatar merge-art-sakura" src="/assets/planet-merge/fate/sakura.webp" alt="" /><img className="merge-art-avatar merge-art-jeanne" src="/assets/planet-merge/fate/jeanne.webp" alt="" /><i className="merge-art-comet">✦</i></>}
+      {type === "nightfall" && <><i className="nightfall-moon" /><i className="nightfall-hero">♜</i><i className="nightfall-whip" /><i className="nightfall-enemy nf-e1" /><i className="nightfall-enemy nf-e2" /><i className="nightfall-enemy nf-e3" /><i className="nightfall-gem ng-g1" /><i className="nightfall-gem ng-g2" /></>}
+      {type === "iron" && <><img className="iron-city" src="/assets/iron-front/complete2.png" alt="" /><span className="iron-tank" /><span className="iron-soldier" /><i className="iron-blast" /><i className="iron-smoke" /></>}
+      {type === "thunder" && <><i className="thunder-planet" /><img className="thunder-enemy thunder-enemy-a" src="/assets/kenney-space-shooter/enemyRed1.png" alt="" /><img className="thunder-enemy thunder-enemy-b" src="/assets/kenney-space-shooter/enemyBlack2.png" alt="" /><img className="thunder-player" src="/assets/kenney-space-shooter/playerShip1_blue.png" alt="" /><i className="thunder-laser laser-a" /><i className="thunder-laser laser-b" /></>}
+      {type === "orbit" && <><i className="planet planet-a" /><i className="planet planet-b" /><i className="ship" /><i className="trail" /><i className="asteroid asteroid-a" /><i className="asteroid asteroid-b" /></>}
+      {type === "stack" && <><i className="cloud cloud-a" /><i className="cloud cloud-b" /><i className="stack-piece p1" /><i className="stack-piece p2" /><i className="stack-piece p3" /><i className="stack-piece p4" /><i className="stack-piece p5" /></>}
+      {type === "memory" && <><i className="island" /><i className="memory-card c1">✦</i><i className="memory-card c2">●</i><i className="memory-card c3">◆</i><i className="memory-card c4">✦</i></>}
+      {type === "beat" && <><i className="beat-glow" /><i className="beat-lane l1" /><i className="beat-lane l2" /><i className="beat-lane l3" /><i className="beat-note n1" /><i className="beat-note n2" /><i className="beat-note n3" /><i className="beat-note n4" /><i className="beat-line" /></>}
+      {type === "hamster" && <><i className="casual-art-icon">🐹</i><i className="casual-art-track" /><i className="casual-art-chip ca-a">🌻</i><i className="casual-art-chip ca-b">🌿</i></>}
+      {type === "miner" && <><i className="casual-art-icon">🪝</i><i className="casual-art-rope" /><i className="casual-art-chip ca-a">🪙</i><i className="casual-art-chip ca-b">💎</i><i className="casual-art-chip ca-c">🪨</i></>}
+      {type === "oil" && <><i className="oil-art-sun" /><i className="oil-art-ridge" /><i className="oil-art-rig"><b /><b /><b /></i><i className="oil-art-tank">OIL</i><i className="oil-art-pipe" /><i className="oil-art-gusher" /></>}
+      {type === "minesweeper" && <><i className="mine-art-panel"><b>1</b><b>2</b><b>⚑</b><b /><b>3</b><b>✹</b><b>1</b><b /><b>1</b></i><i className="mine-art-face">🙂</i></>}
+      {type === "go" && <><i className="go-art-board" /><i className="go-art-stone go-art-black" /><i className="go-art-stone go-art-white" /><i className="go-art-stone go-art-black go-art-small" /><i className="go-art-seal">弈</i></>}
+      {type === "mahjong" && <><img className="mahjong-art-room" src="/assets/guiyang-mahjong/lobby-card.webp" alt="" /><i className="mahjong-art-shade" /><i className="mahjong-art-seal">黔</i><i className="mahjong-art-chicken">🐓</i></>}
+      {type === "zuma" && <><i className="zuma-art-track" /><i className="zuma-art-ball za-1" /><i className="zuma-art-ball za-2" /><i className="zuma-art-ball za-3" /><i className="zuma-art-ball za-4" /><i className="zuma-art-ball za-5" /><i className="zuma-art-idol">☀</i></>}
+      {type === "parking" && <><i className="parking-art-sun" /><i className="parking-art-city" /><i className="parking-art-road" /><i className="parking-art-bay">P</i><i className="parking-art-car"><b /><b /></i></>}
+      {type === "moon" && <><i className="moon-art-stars" /><i className="moon-art-planet mp-a" /><i className="moon-art-planet mp-b" /><i className="moon-art-rope" /><i className="moon-art-rabbit">☻</i><i className="moon-art-spark">✦</i></>}
+    </div>
+  );
+}

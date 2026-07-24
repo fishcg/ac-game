@@ -1,0 +1,49 @@
+.panel {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: 14px;
+  display: flex;
+  gap: 5px;
+  transform: translateX(-50%);
+}
+
+.panel button {
+  position: relative;
+  width: 91px;
+  min-height: 49px;
+  padding: 6px 7px;
+  border: 1px solid #d8a9ff52;
+  border-radius: 8px;
+  background: #1a122bdc;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 7px 20px #0006;
+  backdrop-filter: blur(8px);
+}
+
+.panel button:disabled { opacity: .37; cursor: default; filter: grayscale(.8); }
+.panel button:not(:disabled):hover { transform: translateY(-3px); border-color: #ffdc84; }
+.panel kbd { position: absolute; top: 2px; right: 4px; color: #ffffff75; font-size: 6px; font-family: inherit; }
+.panel i { color: #ffdc84; font-size: 17px; font-style: normal; }
+.panel span { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.panel strong { overflow: hidden; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
+.panel small { color: #c8a6df; font-size: 6px; white-space: nowrap; }
+
+:global(.game-modal__frame:fullscreen) .panel, :global(.game-modal__frame--fullscreen) .panel { bottom: 24px; gap: 9px; }
+:global(.game-modal__frame:fullscreen) .panel button, :global(.game-modal__frame--fullscreen) .panel button { width: 142px; min-height: 70px; padding: 10px 12px; gap: 10px; border-width: 2px; }
+:global(.game-modal__frame:fullscreen) .panel kbd, :global(.game-modal__frame--fullscreen) .panel kbd { top: 5px; right: 7px; font-size: 9px; }
+:global(.game-modal__frame:fullscreen) .panel i, :global(.game-modal__frame--fullscreen) .panel i { font-size: 27px; }
+:global(.game-modal__frame:fullscreen) .panel span, :global(.game-modal__frame--fullscreen) .panel span { gap: 4px; }
+:global(.game-modal__frame:fullscreen) .panel strong, :global(.game-modal__frame--fullscreen) .panel strong { font-size: 11px; }
+:global(.game-modal__frame:fullscreen) .panel small, :global(.game-modal__frame--fullscreen) .panel small { font-size: 9px; }
+
+@media (max-width: 760px) {
+  .panel { bottom: 8px; gap: 3px; }
+  .panel button { width: 47px; min-height: 43px; justify-content: center; }
+  .panel span { display: none; }
+}

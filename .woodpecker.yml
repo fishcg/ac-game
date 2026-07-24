@@ -1,0 +1,44 @@
+steps:
+  quality-check:
+    image: node:24.13.0-alpine
+    environment:
+      NEXT_TELEMETRY_DISABLED: "1"
+    commands:
+      - npm ci
+      - npm run lint -- --max-warnings=0
+      - npm test
+      - npm run build
+    when:
+      - event: push
+        branch: master
+      - event: tag
+
+  build-and-push:
+    image: woodpeckerci/plugin-docker-buildx:latest
+    privileged: true
+    settings:
+      registry: ghcr.io
+      repo: ghcr.io/fishcg/ac-game
+      username:
+        from_secret: ghcr_username
+      password:
+        from_secret: ghcr_token
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:7}
+    when:
+      - event: push
+        branch: master
+      - event: tag
+
+  update-k8s-deployment:
+    image: bitnami/kubectl:latest
+    environment:
+      KUBECONFIG: /woodpecker/kubeconfig
+    commands:
+      - kubectl set image deployment/ac-game ac-game=ghcr.io/fishcg/ac-game:${CI_COMMIT_SHA:0:7} --namespace=default
+      - kubectl rollout status deployment/ac-game --namespace=default --timeout=180s
+    when:
+      - event: push
+        branch: master
+      - event: tag

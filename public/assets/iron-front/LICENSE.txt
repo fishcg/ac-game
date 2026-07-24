@@ -1,0 +1,11 @@
+2D Platformer Shooter - Asset Pack (Demo)
+Author: 16Pixel
+Source: https://opengameart.org/content/2d-platformer-shooter-asset-pack
+Creator page: https://16pixel.itch.io/
+License: Creative Commons Attribution-ShareAlike 4.0 International
+License URL: https://creativecommons.org/licenses/by-sa/4.0/
+
+The selected image assets in this directory come from the pack above.
+Attribution: 16Pixel (https://16pixel.itch.io/)
+
+Adaptations of these assets are distributed under CC-BY-SA 4.0.

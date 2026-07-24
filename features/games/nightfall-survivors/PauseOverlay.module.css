@@ -1,0 +1,73 @@
+.pauseButton {
+  position: absolute;
+  z-index: 8;
+  right: 18px;
+  bottom: 18px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #ffffff42;
+  border-radius: 50%;
+  background: #1b142dcc;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 7px 20px #0006;
+  backdrop-filter: blur(8px);
+}
+
+.pauseButton:hover {
+  border-color: #e4b2ff;
+  background: #3a2458e8;
+}
+
+.overlay {
+  position: absolute;
+  z-index: 14;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 45%, #442c61dd, #0e0a19ed 65%);
+  backdrop-filter: blur(7px);
+  text-align: center;
+}
+
+.overlay > span {
+  color: #d7a7ff;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .25em;
+}
+
+.overlay h3 {
+  margin: 8px 0 5px;
+  font-family: Georgia, "Songti SC", serif;
+  font-size: 34px;
+  font-weight: 400;
+}
+
+.overlay p {
+  margin: 0;
+  color: #ffffff8a;
+  font-size: 9px;
+}
+
+.overlay button {
+  min-width: 140px;
+  height: 41px;
+  margin-top: 20px;
+  border: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f3d27d, #d68bff);
+  color: #1a1226;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.overlay small {
+  margin-top: 9px;
+  color: #ffffff63;
+  font-size: 7px;
+}

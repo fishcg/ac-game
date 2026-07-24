@@ -1,0 +1,22 @@
+.banner {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  bottom: 77px;
+  min-width: 180px;
+  padding: 8px 13px;
+  transform: translateX(-50%);
+  border: 1px solid #ffbd6d6b;
+  border-radius: 9px;
+  background: #381b26e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  box-shadow: 0 0 22px #ff704747;
+  pointer-events: none;
+}
+.banner strong { color: #ffd495; font-size: 9px; letter-spacing: .08em; }
+.banner span { color: white; font-family: Georgia, serif; font-size: 15px; }
+.active { animation: pulse .65s ease-in-out infinite alternate; }
+@keyframes pulse { to { transform: translateX(-50%) scale(1.04); box-shadow: 0 0 34px #ff504f70; } }

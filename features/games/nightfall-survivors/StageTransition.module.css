@@ -1,0 +1,42 @@
+.overlay {
+  position: absolute;
+  z-index: 14;
+  inset: 0;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--stage-from), #090712 48%, var(--stage-to));
+  color: white;
+  animation: stage-fade 2.2s ease both;
+  pointer-events: all;
+}
+
+.overlay::before,
+.overlay::after {
+  content: "";
+  position: absolute;
+  width: 68vmax;
+  height: 68vmax;
+  border: 1px solid color-mix(in srgb, var(--stage-accent) 52%, transparent);
+  transform: rotate(45deg);
+  animation: rune-turn 2.2s ease-out both;
+}
+
+.overlay::after { width: 48vmax; height: 48vmax; animation-direction: reverse; opacity: .42; }
+.wipe { position: absolute; inset: -20%; background: linear-gradient(105deg, transparent 28%, color-mix(in srgb, var(--stage-accent) 70%, white) 49%, transparent 68%); opacity: .34; transform: translateX(-110%); animation: stage-wipe 1.15s .42s ease-in-out forwards; }
+.content { position: relative; width: min(620px,86%); display: flex; flex-direction: column; align-items: center; text-align: center; text-shadow: 0 4px 20px #000; animation: content-rise 1.8s ease both; }
+.content small { color: #ffe8a7; font-size: 10px; font-weight: 900; letter-spacing: .34em; }
+.content span { margin-top: 8px; color: #ffffff80; font: 13px Georgia,"Songti SC",serif; }
+.content i { margin: 20px 0; color: var(--stage-accent); font-size: 28px; font-style: normal; filter: drop-shadow(0 0 16px var(--stage-accent)); animation: diamond-pulse .7s ease-in-out infinite alternate; }
+.content em { color: #ffffff70; font-size: 8px; font-style: normal; letter-spacing: .25em; }
+.content strong { margin-top: 7px; color: #fff4cc; font: 400 35px Georgia,"Songti SC",serif; }
+.content p { margin: 7px 0 22px; color: #ffffffa3; font-size: 11px; }
+.content b { width: min(360px,70%); height: 4px; overflow: hidden; border-radius: 6px; background: #ffffff18; }
+.content u { display: block; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--stage-accent),#fff2a8); transform-origin: left; animation: transition-progress 2.05s .08s linear both; }
+
+@keyframes stage-fade { 0% { opacity: 0; } 12%,88% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes stage-wipe { to { transform: translateX(110%); } }
+@keyframes rune-turn { from { opacity: 0; transform: rotate(15deg) scale(.6); } 35% { opacity: .65; } to { opacity: 0; transform: rotate(75deg) scale(1.2); } }
+@keyframes content-rise { 0% { opacity: 0; transform: translateY(24px) scale(.95); } 20%,82% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-16px) scale(1.03); } }
+@keyframes diamond-pulse { to { transform: scale(1.22) rotate(45deg); } }
+@keyframes transition-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }

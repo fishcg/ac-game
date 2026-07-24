@@ -1,0 +1,26 @@
+.banner {
+  position: absolute;
+  z-index: 7;
+  top: 104px;
+  left: 50%;
+  width: 244px;
+  padding: 9px 12px;
+  transform: translateX(-50%);
+  border: 1px solid #ffd45f8c;
+  border-radius: 10px;
+  background: linear-gradient(135deg,#3d2518e8,#241526e8);
+  box-shadow: 0 8px 28px #0008,0 0 26px #ffc14a3d;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 5px 10px;
+  pointer-events: none;
+  backdrop-filter: blur(7px);
+}
+.banner div { display: flex; flex-direction: column; gap: 2px; }
+.banner span { color: #ffcc67; font-size: 5px; font-weight: 900; letter-spacing: .2em; }
+.banner strong { color: #fff0b4; font-family: Georgia,"Songti SC",serif; font-size: 10px; }
+.banner em { align-self: center; color: white; font-family: Georgia,serif; font-size: 17px; font-style: normal; }
+.banner i { grid-column: 1/-1; display: block; height: 4px; overflow: hidden; border-radius: 5px; background: #ffffff14; }
+.banner i b { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#ff9d4d,#ffe77d); box-shadow: 0 0 8px #ffc456; transition: width .1s linear; }
+.banner small { grid-column: 1/-1; color: #ffffff6f; font-size: 5px; }
+@media(max-width:760px){.banner{top:98px;width:190px}.banner small{display:none}}

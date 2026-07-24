@@ -1,0 +1,9 @@
+Space Shooter Redux
+Author: Kenney (https://kenney.nl)
+Source: https://opengameart.org/content/space-shooter-redux
+License: CC0 1.0 Universal
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+
+The selected images and audio files in this directory were taken from the
+Space Shooter Redux pack. Attribution is optional; credit to Kenney is
+appreciated by the author.

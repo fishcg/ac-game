@@ -1,0 +1,10 @@
+DawnLike 16x16 Universal Roguelike Tileset v1.81
+
+Source: https://opengameart.org/content/dawnlike-16x16-universal-rogue-like-tileset-v181
+Author: DragonDePlatino
+Original palette attribution: DawnBringer
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+License URL: https://creativecommons.org/licenses/by/4.0/
+
+The cropped character sprites in this directory are derived from Characters/Undead0.png
+and Characters/Reptile0.png. They are used for the necromancer summon system.
