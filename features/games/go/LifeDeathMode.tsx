@@ -17,6 +17,7 @@ const UNLOCK_KEY = "ac-game-go-life-death-unlocked";
 const colorName = (color: PlayerStone) => color === 1 ? "黑棋" : "白棋";
 
 function targetText(level: LifeDeathLevel) {
+  if (level.goal === "solve") return `按标准变化完成 ${level.solution.length} 手`;
   if (level.goal === "live") return `救活 ${colorName(level.targetColor)}目标棋块，至少做出 ${level.requiredLiberties} 气`;
   if (level.goal === "break-eye") return `破坏 ${colorName(level.targetColor)}假眼并提净目标棋块`;
   return `在 ${level.maxMoves} 手内提净 ${colorName(level.targetColor)}目标棋块`;
@@ -46,7 +47,7 @@ export function LifeDeathMode({ bestScore, onScore, onBack }: Props) {
   const [message, setMessage] = useState("选择一关开始挑战");
   const responseTimer = useRef<number | null>(null);
   const level = useMemo(() => lifeDeathLevels[selectedId - 1] ?? lifeDeathLevels[0], [selectedId]);
-  const stars = useMemo(() => starPoints(9), []);
+  const stars = useMemo(() => starPoints(level.boardSize), [level.boardSize]);
   const state = useMemo(() => targetGroupState(board, level), [board, level]);
 
   useEffect(() => {
@@ -97,7 +98,7 @@ export function LifeDeathMode({ bestScore, onScore, onBack }: Props) {
     }
   };
 
-  const applyOpponentResponse = (currentBoard: Stone[], currentHistory: string[], response: number, currentMoves: number) => {
+  const applyOpponentResponse = (currentBoard: Stone[], currentHistory: string[], response: number, currentMoves: number, currentProgress: number) => {
     const move = applyLifeDeathMove(currentBoard, response, otherColor(level.playerColor), currentHistory);
     if (!move.legal) {
       setThinking(false);
@@ -109,12 +110,12 @@ export function LifeDeathMode({ bestScore, onScore, onBack }: Props) {
     setHistory(nextHistory);
     setLastMove(response);
     setThinking(false);
-    const evaluation = evaluateLifeDeath(level, move.board, currentMoves);
+    const evaluation = evaluateLifeDeath(level, move.board, currentMoves, currentProgress);
     if (evaluation.status !== "playing") {
       finishLevel(evaluation, currentMoves);
       return;
     }
-    setMessage(`对手在 ${formatPoint(response)} 应手，轮到你`);
+    setMessage(`对手在 ${formatPoint(response, level.boardSize)} 应手，轮到你`);
     gameAudio.play(move.captured > 0 ? "score" : "move");
   };
 
@@ -138,18 +139,18 @@ export function LifeDeathMode({ bestScore, onScore, onBack }: Props) {
     setLastMove(index);
     setHintIndex(null);
     gameAudio.play(move.captured > 0 ? "score" : "tap");
-    const evaluation = evaluateLifeDeath(level, move.board, nextMoves);
+    const evaluation = evaluateLifeDeath(level, move.board, nextMoves, nextProgress);
     if (evaluation.status !== "playing") {
       finishLevel(evaluation, nextMoves);
       return;
     }
     if (!correct) setMessage("这手没有解决要点，再观察目标棋块的气");
     else setMessage(move.captured > 0 ? `提走 ${move.captured} 子，继续判断` : "关键手正确，留意对手的应手");
-    const response = level.opponentResponses[nextMoves - 1];
+    const response = correct ? level.opponentResponses[nextProgress - 1] : null;
     if (response !== null && response !== undefined) {
       setThinking(true);
       setMessage("题目对手正在应手…");
-      responseTimer.current = window.setTimeout(() => applyOpponentResponse(move.board, [...history, boardHash(move.board)], response, nextMoves), 440);
+      responseTimer.current = window.setTimeout(() => applyOpponentResponse(move.board, [...history, boardHash(move.board)], response, nextMoves, nextProgress), 440);
     }
   };
 
@@ -158,23 +159,25 @@ export function LifeDeathMode({ bestScore, onScore, onBack }: Props) {
     const index = level.solution[solutionProgress] ?? level.solution[0];
     setHintUsed(true);
     setHintIndex(index ?? null);
-    setMessage(index === undefined ? level.hint : `提示：关键点在 ${formatPoint(index)}`);
+    setMessage(index === undefined ? level.hint : `提示：关键点在 ${formatPoint(index, level.boardSize)}`);
     gameAudio.play("move");
   };
 
   const reset = () => startLevel(level.id);
-  const stateLabel = state.present ? `${state.liberties.size} 气 · ${state.eyes} 眼` : "目标棋块已消失";
+  const stateLabel = level.goal === "solve"
+    ? `标准变化 ${Math.min(solutionProgress, level.solution.length)} / ${level.solution.length} 手`
+    : state.present ? `${state.liberties.size} 气 · ${state.eyes} 眼` : "目标棋块已消失";
 
   return (
     <div className={styles.game}>
       <div className={styles.ink} aria-hidden="true" />
       <main className={styles.layout}>
         <section className={`${styles.boardShell} ${styles.puzzleBoard}`} aria-label="死活棋题目棋盘">
-          <div className={styles.board} style={{ gridTemplateColumns: "repeat(9, 1fr)" }} role="grid">
+          <div className={styles.board} style={{ gridTemplateColumns: `repeat(${level.boardSize}, 1fr)` }} role="grid">
             {board.map((stone, index) => {
-              const row = Math.floor(index / 9);
-              const col = index % 9;
-              const edgeClasses = [row === 0 ? styles.top : "", row === 8 ? styles.bottom : "", col === 0 ? styles.left : "", col === 8 ? styles.right : ""].join(" ");
+              const row = Math.floor(index / level.boardSize);
+              const col = index % level.boardSize;
+              const edgeClasses = [row === 0 ? styles.top : "", row === level.boardSize - 1 ? styles.bottom : "", col === 0 ? styles.left : "", col === level.boardSize - 1 ? styles.right : ""].join(" ");
               const target = level.targetGroup.includes(index) && stone === level.targetColor;
               return <button key={index} className={`${styles.point} ${edgeClasses}`} onClick={() => placeStone(index)} role="gridcell" aria-label={`${row + 1}行${col + 1}列，${stone ? colorName(stone as PlayerStone) : "空位"}`} disabled={phase !== "playing" || thinking || stone !== 0}>
                 {stars.has(index) && stone === 0 && <i className={styles.star} />}
@@ -197,7 +200,7 @@ export function LifeDeathMode({ bestScore, onScore, onBack }: Props) {
         </aside>
       </main>
 
-      {phase === "select" && <div className={styles.overlay}><div className={`${styles.introPanel} ${styles.levelSelectPanel}`}><span className={styles.seal}>死</span><h3>死活棋 · 50 关</h3><p>从最后一口气开始，判断目标棋块是死是活。每关局面固定，通关后自动解锁下一关。</p><div className={styles.levelGrid}>{lifeDeathLevels.map((item) => <button key={item.id} className={`${styles.levelButton} ${item.id === selectedId ? styles.selected : ""} ${item.id > unlocked ? styles.locked : ""}`} onClick={() => item.id <= unlocked && setSelectedId(item.id)} disabled={item.id > unlocked}><strong>{item.id}</strong><small>{item.id > unlocked ? "锁定" : `难度 ${item.difficulty}`}</small></button>)}</div><button className={styles.start} onClick={() => startLevel(selectedId)}>开始第 {selectedId} 关</button><button className={styles.backLink} onClick={onBack}>返回围棋模式选择</button></div></div>}
+      {phase === "select" && <div className={styles.overlay}><div className={`${styles.introPanel} ${styles.levelSelectPanel}`}><span className={styles.seal}>死</span><h3>死活棋 · 50 关</h3><p>公开 SGF 标准题库：20 道入门、20 道中级、10 道高级题。保留完整 19 路局面与标准应手，通关后解锁下一题。</p><div className={styles.levelGrid}>{lifeDeathLevels.map((item) => <button key={item.id} className={`${styles.levelButton} ${item.id === selectedId ? styles.selected : ""} ${item.id > unlocked ? styles.locked : ""}`} onClick={() => item.id <= unlocked && setSelectedId(item.id)} disabled={item.id > unlocked}><strong>{item.id}</strong><small>{item.id > unlocked ? "锁定" : `难度 ${item.difficulty}`}</small></button>)}</div><button className={styles.start} onClick={() => startLevel(selectedId)}>开始第 {selectedId} 关</button><button className={styles.backLink} onClick={onBack}>返回围棋模式选择</button></div></div>}
 
       {(phase === "won" || phase === "lost") && <div className={styles.overlay}><div className={styles.resultPanel}><span className={styles.seal}>{phase === "won" ? "活" : "停"}</span><h3>{phase === "won" ? (level.id === 50 ? "全部通关" : "本关通过") : "再想一手"}</h3><p>{message}</p><div className={styles.scoreDetails}><span>{level.chapter}</span><span>用时步数 {moves}</span><span>{hintUsed ? "使用过提示" : "无提示"}</span></div><div className={styles.resultActions}>{phase === "won" && level.id < 50 && <button onClick={() => startLevel(level.id + 1)}>下一关</button>}<button onClick={reset}>{phase === "won" ? "再练一次" : "重新挑战"}</button><button onClick={() => setPhase("select")}>选择关卡</button></div></div></div>}
     </div>

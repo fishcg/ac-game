@@ -153,7 +153,7 @@ export const games: GameInfo[] = [
   {
     id: "go", title: "围棋：对弈与死活", eyebrow: "黑白对弈 · 50关题库",
     description: "9 路或标准 19 路人机对弈，加上由简单到困难的 50 关死活棋挑战。", category: "益智", players: "NEW", duration: "2–40 分钟", accent: "#9b6335", art: "go",
-    controls: "人机对战点击交叉点落子，可停一手、认输并按中国数子法结算；死活棋模式在限定手数内杀死或救活高亮目标棋块，可查看提示、重置和选关",
+    controls: "人机对战点击交叉点落子，可停一手、认输并按中国数子法结算；死活棋使用完整 19 路 SGF 标准局面，按变化图寻找急所，对手会自动应手，可查看提示、重置和选关",
   },
   {
     id: "guiyang-mahjong", title: "贵阳捉鸡麻将", eyebrow: "黔城牌局",

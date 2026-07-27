@@ -2,19 +2,20 @@ import { groupAt, playMove } from "./goRules";
 import type { BoardSize, PlayerStone, Stone } from "./types";
 import type { LifeDeathLevel, LifeDeathEvaluation } from "./lifeDeathTypes";
 
-const SIZE: BoardSize = 9;
+const DEFAULT_SIZE: BoardSize = 9;
 
 export function targetGroupState(board: Stone[], level: LifeDeathLevel) {
+  const size = level.boardSize;
   const seed = level.targetGroup.find((index) => board[index] === level.targetColor);
   if (seed === undefined) return { present: false, stones: new Set<number>(), liberties: new Set<number>(), eyes: 0 };
-  const group = groupAt(board, seed, SIZE);
+  const group = groupAt(board, seed, size);
   const targetStones = new Set(level.targetGroup.filter((index) => board[index] === level.targetColor));
   const sameGroup = [...targetStones].some((index) => group.stones.has(index));
   if (!sameGroup) return { present: false, stones: new Set<number>(), liberties: new Set<number>(), eyes: 0 };
-  return { present: true, stones: group.stones, liberties: group.liberties, eyes: countEyes(board, group.stones, SIZE) };
+  return { present: true, stones: group.stones, liberties: group.liberties, eyes: countEyes(board, group.stones, size) };
 }
 
-export function countEyes(board: Stone[], stones: Set<number>, size: BoardSize = SIZE) {
+export function countEyes(board: Stone[], stones: Set<number>, size: BoardSize = DEFAULT_SIZE) {
   const visited = new Set<number>();
   let eyes = 0;
   board.forEach((stone, start) => {
@@ -44,8 +45,17 @@ export function countEyes(board: Stone[], stones: Set<number>, size: BoardSize =
   return eyes;
 }
 
-export function evaluateLifeDeath(level: LifeDeathLevel, board: Stone[], moves: number): LifeDeathEvaluation {
+export function evaluateLifeDeath(level: LifeDeathLevel, board: Stone[], moves: number, solutionProgress = 0): LifeDeathEvaluation {
   const state = targetGroupState(board, level);
+  if (level.goal === "solve") {
+    if (solutionProgress >= level.solution.length) {
+      return { status: "won", reason: "已完成题库标准变化", targetPresent: state.present, liberties: state.liberties.size, eyes: state.eyes };
+    }
+    if (moves >= level.maxMoves) {
+      return { status: "lost", reason: "主变化未完成，步数已用尽", targetPresent: state.present, liberties: state.liberties.size, eyes: state.eyes };
+    }
+    return { status: "playing", reason: "继续寻找标准变化", targetPresent: state.present, liberties: state.liberties.size, eyes: state.eyes };
+  }
   if (level.goal === "kill" || level.goal === "break-eye") {
     if (!state.present) return { status: "won", reason: "目标棋块已被提净", targetPresent: false, liberties: 0, eyes: 0 };
     if (moves >= level.maxMoves) return { status: "lost", reason: "步数用尽，目标棋块仍未气尽", targetPresent: true, liberties: state.liberties.size, eyes: state.eyes };
@@ -59,10 +69,11 @@ export function evaluateLifeDeath(level: LifeDeathLevel, board: Stone[], moves: 
 }
 
 export function applyLifeDeathMove(board: Stone[], index: number, color: PlayerStone, history: string[]) {
-  return playMove(board, index, color, SIZE, history);
+  const size = Math.sqrt(board.length) as BoardSize;
+  return playMove(board, index, color, size, history);
 }
 
-export function formatPoint(index: number, size: BoardSize = SIZE) {
+export function formatPoint(index: number, size: BoardSize = DEFAULT_SIZE) {
   const letters = "ABCDEFGHJKLMNOPQRST";
   const row = Math.floor(index / size);
   const col = index % size;

@@ -1,13 +1,13 @@
-import type { Stone, PlayerStone } from "./types";
+import type { BoardSize, Stone, PlayerStone } from "./types";
 
-export type LifeDeathGoal = "kill" | "break-eye" | "live";
+export type LifeDeathGoal = "kill" | "break-eye" | "live" | "solve";
 
 export type LifeDeathLevel = {
   id: number;
   title: string;
   chapter: string;
   difficulty: 1 | 2 | 3 | 4 | 5;
-  boardSize: 9;
+  boardSize: BoardSize;
   board: Stone[];
   playerColor: PlayerStone;
   targetColor: PlayerStone;
@@ -19,6 +19,9 @@ export type LifeDeathLevel = {
   opponentResponses: Array<number | null>;
   hint: string;
   explanation: string;
+  source: string;
+  sourceUrl: string;
+  license: string;
 };
 
 export type LifeDeathEvaluation = {
