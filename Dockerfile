@@ -1,4 +1,4 @@
-FROM node:24.13.0-alpine AS deps
+FROM 172.24.173.77:30500/node:24.13.0-alpine AS deps
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ ENV http_proxy=${http_proxy} \
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:24.13.0-alpine AS builder
+FROM 172.24.173.77:30500/node:24.13.0-alpine AS builder
 
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -22,7 +22,7 @@ COPY package.json package-lock.json ./
 COPY . .
 RUN npm run build
 
-FROM node:24.13.0-alpine AS runner
+FROM 172.24.173.77:30500/node:24.13.0-alpine AS runner
 
 WORKDIR /home/www/ac-game
 
