@@ -25,6 +25,7 @@ import { RunePeg } from "./rune-peg/Game";
 import { FateChamber } from "./fate-chamber/Game";
 import { PlanetMerge } from "./planet-merge/Game";
 import { GuiyangMahjong } from "./guiyang-mahjong/Game";
+import { GameViewport } from "./GameViewport";
 
 type Props = {
   game: GameInfo;
@@ -94,28 +95,30 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
             <button className="icon-button" onClick={onClose} aria-label="关闭游戏"><CloseIcon /></button>
           </div>
         </header>
-        <div className="game-stage">
-          {game.id === "worm-front" && <WormFront bestScore={bestScore} onScore={onScore} />}
-          {game.id === "prism-dash" && <PrismDash bestScore={bestScore} onScore={onScore} />}
-          {game.id === "rune-peg" && <RunePeg bestScore={bestScore} onScore={onScore} />}
-          {game.id === "fate-chamber" && <FateChamber bestScore={bestScore} onScore={onScore} />}
-          {game.id === "planet-merge" && <PlanetMerge bestScore={bestScore} onScore={onScore} />}
-          {game.id === "orbit-dash" && <OrbitDash bestScore={bestScore} onScore={onScore} />}
-          {game.id === "stack-up" && <StackUp bestScore={bestScore} onScore={onScore} />}
-          {game.id === "memory-pairs" && <MemoryPairs bestScore={bestScore} onScore={onScore} />}
-          {game.id === "beat-rush" && <BeatRush bestScore={bestScore} onScore={onScore} />}
-          {game.id === "thunder-wing" && <ThunderWing bestScore={bestScore} onScore={onScore} />}
-          {game.id === "iron-front" && <IronFront bestScore={bestScore} onScore={onScore} />}
-          {game.id === "nightfall-survivors" && <NightfallSurvivors bestScore={bestScore} onScore={onScore} />}
-          {game.id === "hamster-roll" && <HamsterRoll bestScore={bestScore} onScore={onScore} />}
-          {game.id === "gold-miner" && <GoldMiner bestScore={bestScore} onScore={onScore} />}
-          {game.id === "oil-tycoon" && <OilTycoon bestScore={bestScore} onScore={onScore} />}
-          {game.id === "minesweeper" && <Minesweeper bestScore={bestScore} onScore={onScore} />}
-          {game.id === "go" && <GoGame bestScore={bestScore} onScore={onScore} />}
-          {game.id === "guiyang-mahjong" && <GuiyangMahjong bestScore={bestScore} onScore={onScore} />}
-          {game.id === "zuma" && <ZumaGame bestScore={bestScore} onScore={onScore} />}
-          {game.id === "perfect-parking" && <PerfectParking bestScore={bestScore} onScore={onScore} />}
-          {game.id === "moon-swing" && <MoonSwing bestScore={bestScore} onScore={onScore} />}
+        <div className={`game-stage game-stage--${game.id}`}>
+          <GameViewport gameId={game.id}>
+            {game.id === "worm-front" && <WormFront bestScore={bestScore} onScore={onScore} />}
+            {game.id === "prism-dash" && <PrismDash bestScore={bestScore} onScore={onScore} />}
+            {game.id === "rune-peg" && <RunePeg bestScore={bestScore} onScore={onScore} />}
+            {game.id === "fate-chamber" && <FateChamber bestScore={bestScore} onScore={onScore} />}
+            {game.id === "planet-merge" && <PlanetMerge bestScore={bestScore} onScore={onScore} />}
+            {game.id === "orbit-dash" && <OrbitDash bestScore={bestScore} onScore={onScore} />}
+            {game.id === "stack-up" && <StackUp bestScore={bestScore} onScore={onScore} />}
+            {game.id === "memory-pairs" && <MemoryPairs bestScore={bestScore} onScore={onScore} />}
+            {game.id === "beat-rush" && <BeatRush bestScore={bestScore} onScore={onScore} />}
+            {game.id === "thunder-wing" && <ThunderWing bestScore={bestScore} onScore={onScore} />}
+            {game.id === "iron-front" && <IronFront bestScore={bestScore} onScore={onScore} />}
+            {game.id === "nightfall-survivors" && <NightfallSurvivors bestScore={bestScore} onScore={onScore} />}
+            {game.id === "hamster-roll" && <HamsterRoll bestScore={bestScore} onScore={onScore} />}
+            {game.id === "gold-miner" && <GoldMiner bestScore={bestScore} onScore={onScore} />}
+            {game.id === "oil-tycoon" && <OilTycoon bestScore={bestScore} onScore={onScore} />}
+            {game.id === "minesweeper" && <Minesweeper bestScore={bestScore} onScore={onScore} />}
+            {game.id === "go" && <GoGame bestScore={bestScore} onScore={onScore} />}
+            {game.id === "guiyang-mahjong" && <GuiyangMahjong bestScore={bestScore} onScore={onScore} />}
+            {game.id === "zuma" && <ZumaGame bestScore={bestScore} onScore={onScore} />}
+            {game.id === "perfect-parking" && <PerfectParking bestScore={bestScore} onScore={onScore} />}
+            {game.id === "moon-swing" && <MoonSwing bestScore={bestScore} onScore={onScore} />}
+          </GameViewport>
         </div>
         <footer className="game-modal__footer">
           <span className="key-hint">操作方式</span>

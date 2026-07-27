@@ -15,6 +15,9 @@ import { AssetSection } from "./components/AssetSection";
 import { SiteFooter } from "./components/SiteFooter";
 import { RankingPanel } from "./components/RankingPanel";
 
+const featuredGame = games.find((game) => game.id === "stack-up") ?? games[0];
+const recommendedGames = [featuredGame, ...games.filter((game) => game.id !== featuredGame.id)];
+
 export function GameHub() {
   const [profile, setProfile] = useState<GuestProfile | null>(null);
   const [scores, setScores] = useState<ScoreEntry[]>([]);
@@ -34,7 +37,7 @@ export function GameHub() {
     setRecentIds(guestSDK.storage.get<GameId[]>("recent", []));
   }, []);
 
-  const filteredGames = useMemo(() => games.filter((game) => {
+  const filteredGames = useMemo(() => recommendedGames.filter((game) => {
     const categoryMatch = category === "全部" || game.category === category;
     const text = `${game.title}${game.description}${game.category}`.toLowerCase();
     return categoryMatch && text.includes(query.trim().toLowerCase());
@@ -85,9 +88,9 @@ export function GameHub() {
       <section className="content" id="top">
         <Topbar query={query} onQuery={setQuery} onMenu={() => setMobileNav((open) => !open)} />
         <div className="page-content">
-          <Hero featured={games[0]} onPlay={openGame} />
+          <Hero featured={featuredGame} onPlay={openGame} />
           <GameCatalog games={filteredGames} category={category} onCategory={setCategory} onPlay={openGame} getBest={getBest} />
-          <PlayerPanels recentGames={recentGames} scoreCount={scores.length} totalScore={totalScore} getBest={getBest} onPlay={openGame} fallbackGame={games[0]} />
+          <PlayerPanels recentGames={recentGames} scoreCount={scores.length} totalScore={totalScore} getBest={getBest} onPlay={openGame} fallbackGame={featuredGame} />
           <RankingPanel ranking={ranking} currentUserId={profile.id} />
           <AssetSection />
           <SiteFooter />
