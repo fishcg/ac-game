@@ -26,6 +26,7 @@ import { FateChamber } from "./fate-chamber/Game";
 import { PlanetMerge } from "./planet-merge/Game";
 import { GuiyangMahjong } from "./guiyang-mahjong/Game";
 import { GameViewport } from "./GameViewport";
+import { isPortraitViewport, lockLandscapeOrientation, prefersLandscapeFullscreen, unlockOrientation } from "./mobileOrientation";
 
 type Props = {
   game: GameInfo;
@@ -37,29 +38,57 @@ type Props = {
 export function GameModal({ game, bestScore, onClose, onScore }: Props) {
   const [muted, setMuted] = useState(() => gameAudio.isMuted());
   const [fullscreen, setFullscreen] = useState(false);
+  const [landscapeFallback, setLandscapeFallback] = useState(false);
   const frameRef = useRef<HTMLDivElement>(null);
   const fullscreenRef = useRef(false);
+  const orientationLockedRef = useRef(false);
+  const preferLandscape = prefersLandscapeFullscreen(game.id);
 
   useEffect(() => { fullscreenRef.current = fullscreen; }, [fullscreen]);
 
   useEffect(() => {
     const frame = frameRef.current;
+    const releaseOrientation = () => {
+      orientationLockedRef.current = false;
+      setLandscapeFallback(false);
+      unlockOrientation();
+    };
     const close = (event: KeyboardEvent) => {
       if (event.key !== "Escape" || document.fullscreenElement) return;
-      if (fullscreenRef.current) { setFullscreen(false); return; }
+      if (fullscreenRef.current) {
+        releaseOrientation();
+        setFullscreen(false);
+        return;
+      }
       onClose();
     };
-    const syncFullscreen = () => setFullscreen(document.fullscreenElement === frame);
+    const syncFullscreen = () => {
+      const active = document.fullscreenElement === frame;
+      setFullscreen(active);
+      if (!active) releaseOrientation();
+    };
+    const syncOrientationFallback = () => {
+      if (!fullscreenRef.current || !preferLandscape) {
+        setLandscapeFallback(false);
+        return;
+      }
+      setLandscapeFallback(!orientationLockedRef.current && isPortraitViewport());
+    };
     window.addEventListener("keydown", close);
+    window.addEventListener("resize", syncOrientationFallback);
+    screen.orientation?.addEventListener?.("change", syncOrientationFallback);
     document.addEventListener("fullscreenchange", syncFullscreen);
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", close);
+      window.removeEventListener("resize", syncOrientationFallback);
+      screen.orientation?.removeEventListener?.("change", syncOrientationFallback);
       document.removeEventListener("fullscreenchange", syncFullscreen);
       if (document.fullscreenElement === frame) void document.exitFullscreen();
+      releaseOrientation();
       document.body.style.overflow = "";
     };
-  }, [onClose]);
+  }, [onClose, preferLandscape]);
 
   useEffect(() => gameAudio.subscribe(setMuted), []);
 
@@ -70,19 +99,32 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
   };
 
   const toggleFullscreen = async () => {
-    if (document.fullscreenElement) { await document.exitFullscreen(); return; }
-    if (fullscreen) { setFullscreen(false); return; }
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+    if (fullscreen) {
+      orientationLockedRef.current = false;
+      setLandscapeFallback(false);
+      unlockOrientation();
+      setFullscreen(false);
+      return;
+    }
+
     try {
       await frameRef.current?.requestFullscreen();
-      if (document.fullscreenElement !== frameRef.current) setFullscreen(true);
-    } catch {
-      setFullscreen(true);
-    }
+    } catch { /* Safari iOS 等环境使用 CSS 全屏兜底。 */ }
+
+    setFullscreen(true);
+    if (!preferLandscape) return;
+
+    orientationLockedRef.current = await lockLandscapeOrientation();
+    setLandscapeFallback(!orientationLockedRef.current && isPortraitViewport());
   };
 
   return (
     <div className="game-modal" role="dialog" aria-modal="true" aria-label={game.title}>
-      <div ref={frameRef} className={`game-modal__frame ${fullscreen ? "game-modal__frame--fullscreen" : ""}`}>
+      <div ref={frameRef} className={`game-modal__frame ${fullscreen ? "game-modal__frame--fullscreen" : ""} ${landscapeFallback ? "game-modal__frame--landscape-fallback" : ""}`}>
         <header className="game-modal__header">
           <div>
             <span className="game-modal__eyebrow">正在游玩</span>
@@ -91,7 +133,7 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
           <div className="game-modal__meta">
             <span><TrophyIcon size={17} /> 最高 {bestScore}</span>
             <button className="icon-button" onClick={toggleAudio} aria-label={muted ? "开启声音" : "关闭声音"}>{muted ? <VolumeOffIcon /> : <VolumeIcon />}</button>
-            <button className="icon-button" onClick={() => void toggleFullscreen()} aria-label={fullscreen ? "退出全屏" : "进入全屏"}>{fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</button>
+            <button className="icon-button" onClick={() => void toggleFullscreen()} aria-label={fullscreen ? "退出全屏" : preferLandscape ? "进入横屏全屏" : "进入全屏"}>{fullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}</button>
             <button className="icon-button" onClick={onClose} aria-label="关闭游戏"><CloseIcon /></button>
           </div>
         </header>
