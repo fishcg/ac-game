@@ -151,9 +151,9 @@ export const games: GameInfo[] = [
     controls: "左键翻格，右键插旗；触屏可开启旗帜模式；点击已翻开的数字快速展开，R 重新开始",
   },
   {
-    id: "go", title: "人机围棋", eyebrow: "黑白对弈",
-    description: "在 9 路或标准 19 路棋盘上与本地 AI 对弈，围地、提子并计算胜负。", category: "益智", players: "NEW", duration: "5–40 分钟", accent: "#9b6335", art: "go",
-    controls: "点击交叉点落子；支持停一手、认输、提子、禁入点和劫争规则；双方连续停一手后数子结算",
+    id: "go", title: "围棋：对弈与死活", eyebrow: "黑白对弈 · 50关题库",
+    description: "9 路或标准 19 路人机对弈，加上由简单到困难的 50 关死活棋挑战。", category: "益智", players: "NEW", duration: "2–40 分钟", accent: "#9b6335", art: "go",
+    controls: "人机对战点击交叉点落子，可停一手、认输并按中国数子法结算；死活棋模式在限定手数内杀死或救活高亮目标棋块，可查看提示、重置和选关",
   },
   {
     id: "guiyang-mahjong", title: "贵阳捉鸡麻将", eyebrow: "黔城牌局",

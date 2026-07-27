@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { gameAudio } from "@/lib/audio/gameAudio";
 import type { MiniGameProps } from "../types";
 import { chooseAiMove } from "./goAi";
+import { LifeDeathMode } from "./LifeDeathMode";
 import { boardHash, otherColor, playMove, scoreBoard, starPoints } from "./goRules";
 import type { BoardSize, Captures, MatchResult, PlayerStone, Stone } from "./types";
 import styles from "./GoGame.module.css";
@@ -12,6 +13,7 @@ const EMPTY_CAPTURES: Captures = { black: 0, white: 0 };
 const colorName = (color: PlayerStone) => color === 1 ? "黑棋" : "白棋";
 
 export function GoGame({ bestScore, onScore }: MiniGameProps) {
+  const [mode, setMode] = useState<"match" | "life-death">("match");
   const [setupSize, setSetupSize] = useState<BoardSize>(9);
   const [setupColor, setSetupColor] = useState<PlayerStone>(1);
   const [size, setSize] = useState<BoardSize>(9);
@@ -30,8 +32,9 @@ export function GoGame({ bestScore, onScore }: MiniGameProps) {
   const aiTimer = useRef<number | null>(null);
   const stars = useMemo(() => starPoints(size), [size]);
   const aiColor = otherColor(playerColor);
-
   useEffect(() => () => { if (aiTimer.current !== null) window.clearTimeout(aiTimer.current); }, []);
+
+  if (mode === "life-death") return <LifeDeathMode bestScore={bestScore} onScore={onScore} onBack={() => setMode("match")} />;
 
   const finishByScore = (finalBoard: Stone[]) => {
     const score = scoreBoard(finalBoard, size);
@@ -188,7 +191,7 @@ export function GoGame({ bestScore, onScore }: MiniGameProps) {
         </aside>
       </main>
 
-      {status === "intro" && <div className={styles.overlay}><div className={styles.introPanel}><span className={styles.seal}>弈</span><h3>人机围棋</h3><p>围地、提子、判断死活。支持适合快速对局的 9 路棋盘，以及完整的标准 19 路棋盘。</p><label>选择棋盘</label><div className={styles.choices}><button className={setupSize === 9 ? styles.selected : ""} onClick={() => setSetupSize(9)}><strong>9 路</strong><small>9×9 · 快速对局</small></button><button className={setupSize === 19 ? styles.selected : ""} onClick={() => setSetupSize(19)}><strong>标准 19 路</strong><small>19×19 · 完整棋局</small></button></div><label>选择执子</label><div className={styles.colors}><button className={setupColor === 1 ? styles.selected : ""} onClick={() => setSetupColor(1)}><i className={`${styles.sample} ${styles.black}`} />执黑先行</button><button className={setupColor === 2 ? styles.selected : ""} onClick={() => setSetupColor(2)}><i className={`${styles.sample} ${styles.white}`} />执白后手</button></div><button className={styles.start} onClick={start}>开始对弈</button></div></div>}
+      {status === "intro" && <div className={styles.overlay}><div className={styles.introPanel}><span className={styles.seal}>弈</span><h3>围棋</h3><p>一边与本地 AI 对弈，一边挑战 50 关固定死活题，练习读气、做眼和攻杀。</p><div className={styles.modeChoices}><button className={styles.selected} onClick={() => setMode("match")}><strong>人机对战</strong><small>9 路 / 19 路 · 实战计分</small></button><button onClick={() => setMode("life-death")}><strong>死活棋 50 关</strong><small>由简单到困难 · 固定题局</small></button></div><label>选择棋盘</label><div className={styles.choices}><button className={setupSize === 9 ? styles.selected : ""} onClick={() => setSetupSize(9)}><strong>9 路</strong><small>9×9 · 快速对局</small></button><button className={setupSize === 19 ? styles.selected : ""} onClick={() => setSetupSize(19)}><strong>标准 19 路</strong><small>19×19 · 完整棋局</small></button></div><label>选择执子</label><div className={styles.colors}><button className={setupColor === 1 ? styles.selected : ""} onClick={() => setSetupColor(1)}><i className={`${styles.sample} ${styles.black}`} />执黑先行</button><button className={setupColor === 2 ? styles.selected : ""} onClick={() => setSetupColor(2)}><i className={`${styles.sample} ${styles.white}`} />执白后手</button></div><button className={styles.start} onClick={start}>开始对弈</button></div></div>}
 
       {status === "finished" && result && <div className={styles.overlay}><div className={styles.resultPanel}><span className={styles.seal}>{result.winner === playerColor ? "胜" : "负"}</span><h3>{result.reason === "resign" ? "你已认输" : result.winner === playerColor ? "对局胜利" : "电脑获胜"}</h3>{result.reason === "score" ? <><p>黑棋 {result.black.toFixed(1)} 目 · 白棋 {result.white.toFixed(1)} 目</p><div className={styles.scoreDetails}><span>黑方领地 {result.blackTerritory}</span><span>白方领地 {result.whiteTerritory}</span><span>白棋贴目 {result.komi}</span></div></> : <p>{colorName(result.winner)}中盘胜</p>}<div className={styles.resultActions}><button onClick={start}>再来一局</button><button onClick={openSetup}>更换棋盘</button></div></div></div>}
     </div>
