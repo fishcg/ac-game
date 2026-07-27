@@ -1,44 +1,53 @@
+clone:
+  git:
+    image: 172.24.173.77:30500/woodpecker-git:latest
+    settings:
+      partial: false
+      depth: 1
+      tags: true
+    environment:
+      - https_proxy=http://172.24.173.76:7899
+      - http_proxy=http://172.24.173.76:7899
+      - no_proxy=localhost,127.0.0.1,10.42.0.0/16,10.43.0.0/16,172.24.173.77
+
 steps:
   quality-check:
-    image: node:24.13.0-alpine
+    image: 172.24.173.77:30500/node:24.13.0-alpine
     environment:
       NEXT_TELEMETRY_DISABLED: "1"
+      https_proxy: http://172.24.173.76:7899
+      http_proxy: http://172.24.173.76:7899
+      no_proxy: localhost,127.0.0.1,10.42.0.0/16,10.43.0.0/16,172.24.173.77
     commands:
       - npm ci
       - npm run lint -- --max-warnings=0
       - npm test
       - npm run build
     when:
-      - event: push
-        branch: master
-      - event: tag
+      event: [push, tag]
 
   build-and-push:
-    image: woodpeckerci/plugin-docker-buildx:latest
+    image: 172.24.173.77:30500/standard-docker:latest
     privileged: true
     settings:
-      registry: ghcr.io
-      repo: ghcr.io/fishcg/ac-game
-      username:
-        from_secret: ghcr_username
-      password:
-        from_secret: ghcr_token
+      registry: http://172.24.173.77:30500
+      repo: 172.24.173.77:30500/ac-game
       tags:
         - latest
         - ${CI_COMMIT_SHA:0:7}
+      insecure: true
+      build_args:
+        - http_proxy=http://172.24.173.76:7899
+        - https_proxy=http://172.24.173.76:7899
+        - no_proxy=localhost,127.0.0.1,172.24.173.77,10.42.0.0/16,10.43.0.0/16
     when:
-      - event: push
-        branch: master
-      - event: tag
+      event: [push, tag]
 
   update-k8s-deployment:
-    image: bitnami/kubectl:latest
+    image: 172.24.173.77:30500/bitnami-kubectl:latest
     environment:
       KUBECONFIG: /woodpecker/kubeconfig
     commands:
-      - kubectl set image deployment/ac-game ac-game=ghcr.io/fishcg/ac-game:${CI_COMMIT_SHA:0:7} --namespace=default
-      - kubectl rollout status deployment/ac-game --namespace=default --timeout=180s
+      - kubectl set image deployment/ac-game ac-game=172.24.173.77:30500/ac-game:${CI_COMMIT_SHA:0:7} --namespace=default
     when:
-      - event: push
-        branch: master
-      - event: tag
+      event: [push, tag]
