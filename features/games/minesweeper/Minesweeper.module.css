@@ -17,6 +17,8 @@
 .cell { min-width: 0; aspect-ratio: 1; padding: 0; display: grid; place-items: center; border: 3px solid #7d7d7d; border-top-color: #fff; border-left-color: #fff; border-radius: 0; background: #c6c6c6; color: #111; font-family: Arial Black, Arial, sans-serif; font-size: clamp(9px, 1.8vw, 18px); font-weight: 900; line-height: 1; cursor: pointer; }
 .cell:active:not(.revealed) { border-width: 1px; border-color: #999; }
 .cell.revealed { border: 1px solid #8b8b8b; background: #bdbdbd; cursor: default; }
+.cell.flagged { color: #d51f1f; }
+.flagIcon { display: block; color: #d51f1f !important; -webkit-text-fill-color: #d51f1f; text-shadow: none; filter: none; forced-color-adjust: none; }
 .cell.exploded { background: #ef3b31; color: #111; }
 .cell.wrong { background: #eeb1a8; color: #d40000; }
 .cell.one { color: #0000d0; }.cell.two { color: #087b08; }.cell.three { color: #d00000; }.cell.four { color: #000075; }.cell.five { color: #750000; }.cell.six { color: #087777; }.cell.seven { color: #111; }.cell.eight { color: #686868; }

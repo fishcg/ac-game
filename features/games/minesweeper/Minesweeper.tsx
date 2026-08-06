@@ -114,17 +114,28 @@ export function Minesweeper({ bestScore, onScore }: MiniGameProps) {
           <div className={styles.board} style={{ gridTemplateColumns: `repeat(${difficulty.cols}, 1fr)`, width: boardWidth }} role="grid" aria-label={`${difficulty.label}扫雷棋盘`}>
             {board.map((cell) => {
               const revealed = cell.state === "revealed";
+              const numberClass = revealed && !cell.mine ? NUMBER_CLASS[cell.adjacent] ?? "" : "";
               const label = cell.wrongFlag ? "错误旗帜" : cell.mine && revealed ? "地雷" : cell.state === "flagged" ? "旗帜" : revealed ? cell.adjacent ? `数字 ${cell.adjacent}` : "空白" : "未翻开";
               return (
                 <button
                   key={cell.id}
-                  className={`${styles.cell} ${revealed ? styles.revealed : ""} ${cell.exploded ? styles.exploded : ""} ${cell.wrongFlag ? styles.wrong : ""} ${NUMBER_CLASS[cell.adjacent] ?? ""}`}
+                  className={`${styles.cell} ${revealed ? styles.revealed : ""} ${cell.state === "flagged" ? styles.flagged : ""} ${cell.exploded ? styles.exploded : ""} ${cell.wrongFlag ? styles.wrong : ""} ${numberClass}`}
                   onClick={() => openCell(cell.id)}
                   onContextMenu={(event) => flagCell(event, cell.id)}
                   aria-label={`${cell.row + 1}行${cell.col + 1}列，${label}`}
                   role="gridcell"
                 >
-                  {cell.wrongFlag ? "✕" : cell.state === "flagged" ? "⚑" : revealed && cell.mine ? "✹" : revealed && cell.adjacent > 0 ? cell.adjacent : ""}
+                  {cell.wrongFlag ? (
+                    "✕"
+                  ) : cell.state === "flagged" ? (
+                    <span className={styles.flagIcon} aria-hidden="true">⚑</span>
+                  ) : revealed && cell.mine ? (
+                    "✹"
+                  ) : revealed && cell.adjacent > 0 ? (
+                    cell.adjacent
+                  ) : (
+                    ""
+                  )}
                 </button>
               );
             })}

@@ -146,6 +146,15 @@ export function GoGame({ bestScore, onScore }: MiniGameProps) {
     scheduleAi(board, history, nextPasses, captures, moveNumber + 1, size, playerColor);
   };
 
+  const judgeResult = () => {
+    if (status !== "playing") return;
+    if (aiTimer.current !== null) {
+      window.clearTimeout(aiTimer.current);
+      aiTimer.current = null;
+    }
+    finishByScore(board);
+  };
+
   const resign = () => {
     if (status !== "playing" || thinking) return;
     if (aiTimer.current !== null) window.clearTimeout(aiTimer.current);
@@ -185,8 +194,8 @@ export function GoGame({ bestScore, onScore }: MiniGameProps) {
           <div className={`${styles.player} ${turn === 1 && status === "playing" ? styles.active : ""}`}><i className={`${styles.sample} ${styles.black}`} /><span><strong>黑棋</strong><small>{playerColor === 1 ? "你" : "电脑"} · 提子 {captures.black}</small></span></div>
           <div className={`${styles.player} ${turn === 2 && status === "playing" ? styles.active : ""}`}><i className={`${styles.sample} ${styles.white}`} /><span><strong>白棋</strong><small>{playerColor === 2 ? "你" : "电脑"} · 提子 {captures.white}</small></span></div>
           <div className={styles.status}><i className={thinking ? styles.thinking : ""} />{message}</div>
-          <dl><div><dt>贴目</dt><dd>白棋 {size === 9 ? "5.5" : "7.5"} 目</dd></div><div><dt>规则</dt><dd>中国数子法</dd></div><div><dt>结束</dt><dd>双方连续停一手</dd></div></dl>
-          <div className={styles.actions}><button onClick={pass} disabled={status !== "playing" || thinking || turn !== playerColor}>停一手</button><button onClick={resign} disabled={status !== "playing" || thinking}>认输</button><button onClick={openSetup}>重新开局</button></div>
+          <dl><div><dt>贴目</dt><dd>白棋 {size === 9 ? "5.5" : "7.5"} 目</dd></div><div><dt>规则</dt><dd>中国数子法</dd></div><div><dt>结束</dt><dd>点击判断胜负或双方连续停一手</dd></div></dl>
+          <div className={styles.actions}><button onClick={pass} disabled={status !== "playing" || thinking || turn !== playerColor}>停一手</button><button className={styles.judgeButton} onClick={judgeResult} disabled={status !== "playing"}>判断胜负</button><button onClick={resign} disabled={status !== "playing" || thinking}>认输</button><button onClick={openSetup}>重新开局</button></div>
           <small className={styles.best}>历史最高 {bestScore}</small>
         </aside>
       </main>
