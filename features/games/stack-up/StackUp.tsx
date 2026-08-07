@@ -1,6 +1,6 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import type * as THREE from "three";
 import type { MiniGameProps } from "../types";
@@ -10,6 +10,7 @@ type Block = { x: number; y: number; width: number; color: string };
 const COLORS = ["#ff765c", "#ffae55", "#f4d65e", "#5ec7a2", "#6f80e8", "#a66fe8"];
 
 function TowerScene({ onProgress, onEnd }: { onProgress: (score: number) => void; onEnd: (score: number) => void }) {
+  const { size } = useThree();
   const [blocks, setBlocks] = useState<Block[]>([{ x: 0, y: -2, width: 4, color: COLORS[0] }]);
   const moving = useRef<THREE.Mesh>(null);
   const tower = useRef<THREE.Group>(null);
@@ -38,7 +39,8 @@ function TowerScene({ onProgress, onEnd }: { onProgress: (score: number) => void
     const level = blocks.length;
     if (phaseStartedAt.current === null) phaseStartedAt.current = state.clock.elapsedTime;
     const phaseTime = state.clock.elapsedTime - phaseStartedAt.current;
-    moving.current.position.x = Math.sin(phaseTime * (1.7 + level * 0.035)) * 4.4;
+    const travel = size.height > size.width * 1.25 ? 2.7 : 4.4;
+    moving.current.position.x = Math.sin(phaseTime * (1.7 + level * 0.035)) * travel;
 
     if (dropRequested.current) {
       dropRequested.current = false;
@@ -81,6 +83,13 @@ export function StackUp({ bestScore, onScore }: MiniGameProps) {
   const [status, setStatus] = useState<"intro" | "running" | "over">("intro");
   const [score, setScore] = useState(0);
   const [session, setSession] = useState(0);
+  const [portrait, setPortrait] = useState(() => typeof window !== "undefined" && window.innerHeight > window.innerWidth * 1.25);
+
+  useEffect(() => {
+    const sync = () => setPortrait(window.innerHeight > window.innerWidth * 1.25);
+    window.addEventListener("resize", sync);
+    return () => window.removeEventListener("resize", sync);
+  }, []);
 
   const start = () => {
     gameAudio.play("start");
@@ -103,7 +112,7 @@ export function StackUp({ bestScore, onScore }: MiniGameProps) {
 
   return (
     <div className="mini-game stack-game">
-      <Canvas shadows camera={{ position: [8, 4.8, 9], fov: 48 }} dpr={[1, 1.7]} onPointerDown={() => undefined}>
+      <Canvas shadows camera={portrait ? { position: [8.5, 5, 13], fov: 60 } : { position: [8, 4.8, 9], fov: 48 }} dpr={[1, 1.7]} onPointerDown={() => undefined}>
         {status === "running" ? <TowerScene key={session} onProgress={progress} onEnd={finish} /> : <><color attach="background" args={["#dce8ff"]} /><ambientLight intensity={2} /><directionalLight position={[5, 8, 5]} intensity={3} /><mesh rotation={[0.3, 0.5, 0]}><boxGeometry args={[3, 0.7, 3]} /><meshStandardMaterial color="#6f80e8" /></mesh></>}
       </Canvas>
       <div className="game-hud game-hud--dark"><span>层数</span><strong>{score}</strong><span className="hud-best">BEST {Math.max(bestScore, score)}</span></div>

@@ -10,8 +10,8 @@ export function mergeScore(newTier: number, combo: number) {
   return Math.round(PLANET_TIERS[tier].score * (1 + Math.min(8, Math.max(0, combo - 1)) * .18));
 }
 
-export function isDangerous(ball: Pick<PlanetBall,"y"|"radius"|"age"|"vy"|"alive">) {
-  return ball.alive && ball.age > 1.05 && ball.y - ball.radius < WARNING_Y;
+export function isDangerous(ball: Pick<PlanetBall,"y"|"radius"|"age"|"vy"|"alive">, warningY = WARNING_Y) {
+  return ball.alive && ball.age > 1.05 && ball.y - ball.radius < warningY;
 }
 
 export function nextPlanetTier(random: () => number, maxTier: number, drops = 0): number {

@@ -1,14 +1,12 @@
 import { PLANET_PORTRAITS, preloadPlanetPortraits } from "./assets";
 import { planetMergeAudio } from "./audio";
 import {
-  BIN_FLOOR,
-  BIN_LEFT,
-  BIN_RIGHT,
+  createPlanetLayout,
   MAX_PLANETS,
   PLANET_HEIGHT,
   PLANET_TIERS,
   PLANET_WIDTH,
-  WARNING_Y,
+  type PlanetLayout,
 } from "./data";
 import { canMerge, isDangerous, mergeScore, missionForTier, nextDropKind } from "./rules";
 import type { DropKind, PlanetBall, PlanetCallbacks, PlanetMergeStatus } from "./types";
@@ -19,6 +17,7 @@ type FloatingLabel = { x: number; y: number; life: number; color: string; title:
 type PlanetSprite = { image: HTMLCanvasElement; size: number };
 type ImpactFlash = { x: number; y: number; life: number; size: number; color: string; angle: number };
 type MergeSigil = { x: number; y: number; life: number; radius: number; color: string; rotation: number; tier: number };
+const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
 
 export class PlanetMergeEngine {
   private context: CanvasRenderingContext2D;
@@ -38,7 +37,9 @@ export class PlanetMergeEngine {
   private impacts: ImpactFlash[] = [];
   private sigils: MergeSigil[] = [];
   private nextId = 1;
-  private dropX = (BIN_LEFT + BIN_RIGHT) / 2;
+  private layout: PlanetLayout = createPlanetLayout(PLANET_WIDTH, PLANET_HEIGHT);
+  private backgroundLayoutKey = "";
+  private dropX = (this.layout.binLeft + this.layout.binRight) / 2;
   private current: DropKind = 0;
   private upcoming: DropKind = 0;
   private score = 0;
@@ -75,17 +76,23 @@ export class PlanetMergeEngine {
     const rect = this.canvas.getBoundingClientRect();
     const cssWidth = Math.max(1, rect.width || PLANET_WIDTH);
     const cssHeight = Math.max(1, rect.height || PLANET_HEIGHT);
+    const nextLayout = createPlanetLayout(cssWidth, cssHeight);
+    const previousLayout = this.layout;
+    const layoutChanged = previousLayout.width !== nextLayout.width || previousLayout.height !== nextLayout.height;
+    if (layoutChanged) this.migrateWorld(previousLayout, nextLayout);
+    this.layout = nextLayout;
     const pixelBudgetRatio = Math.sqrt(6_200_000 / (cssWidth * cssHeight));
     const ratio = Math.max(1, Math.min(2, window.devicePixelRatio || 1, pixelBudgetRatio));
     const pixelWidth = Math.max(1, Math.round(cssWidth * ratio));
     const pixelHeight = Math.max(1, Math.round(cssHeight * ratio));
     this.canvas.width = pixelWidth;
     this.canvas.height = pixelHeight;
-    this.viewScale = Math.min(pixelWidth / PLANET_WIDTH, pixelHeight / PLANET_HEIGHT);
-    this.viewOffsetX = (pixelWidth - PLANET_WIDTH * this.viewScale) / 2;
-    this.viewOffsetY = (pixelHeight - PLANET_HEIGHT * this.viewScale) / 2;
+    this.viewScale = Math.min(pixelWidth / this.layout.width, pixelHeight / this.layout.height);
+    this.viewOffsetX = (pixelWidth - this.layout.width * this.viewScale) / 2;
+    this.viewOffsetY = (pixelHeight - this.layout.height * this.viewScale) / 2;
     const nextSpriteResolution = Math.max(2, Math.min(4, Math.ceil(this.viewScale)));
-    if (nextSpriteResolution !== this.spriteResolution || !this.background.width) {
+    const layoutKey = `${this.layout.width}x${this.layout.height}`;
+    if (nextSpriteResolution !== this.spriteResolution || !this.background.width || this.backgroundLayoutKey !== layoutKey) {
       this.spriteResolution = nextSpriteResolution;
       this.rebuildStaticCaches();
     }
@@ -95,10 +102,36 @@ export class PlanetMergeEngine {
     this.draw();
   }
 
+  private migrateWorld(previous: PlanetLayout, next: PlanetLayout) {
+    const previousBinWidth = previous.binRight - previous.binLeft;
+    const previousBinHeight = previous.binFloor - previous.binTop;
+    const nextBinWidth = next.binRight - next.binLeft;
+    const nextBinHeight = next.binFloor - next.binTop;
+    const dropProgress = (this.dropX - previous.binLeft) / Math.max(1, previousBinWidth);
+    this.dropX = next.binLeft + clamp01(dropProgress) * nextBinWidth;
+
+    for (const ball of this.balls) {
+      const xProgress = (ball.x - previous.binLeft) / Math.max(1, previousBinWidth);
+      const yProgress = (ball.y - previous.binTop) / Math.max(1, previousBinHeight);
+      ball.x = Math.max(next.binLeft + ball.radius, Math.min(next.binRight - ball.radius, next.binLeft + clamp01(xProgress) * nextBinWidth));
+      ball.y = Math.max(next.dropY, Math.min(next.binFloor - ball.radius, next.binTop + clamp01(yProgress) * nextBinHeight));
+      ball.vx *= nextBinWidth / Math.max(1, previousBinWidth);
+      ball.vy *= nextBinHeight / Math.max(1, previousBinHeight);
+    }
+
+    // 短命特效无需跨方向迁移，清掉可避免旋转屏幕后出现错位残影。
+    this.particles = [];
+    this.waves = [];
+    this.labels = [];
+    this.impacts = [];
+    this.sigils = [];
+  }
+
   private rebuildStaticCaches() {
     const backgroundResolution = Math.min(3, this.spriteResolution);
-    this.background.width = PLANET_WIDTH * backgroundResolution;
-    this.background.height = PLANET_HEIGHT * backgroundResolution;
+    this.background.width = this.layout.width * backgroundResolution;
+    this.background.height = this.layout.height * backgroundResolution;
+    this.backgroundLayoutKey = `${this.layout.width}x${this.layout.height}`;
     const backgroundContext = this.background.getContext("2d")!;
     backgroundContext.setTransform(backgroundResolution, 0, 0, backgroundResolution, 0, 0);
     this.drawBackdrop(backgroundContext);
@@ -123,7 +156,7 @@ export class PlanetMergeEngine {
     this.impacts = [];
     this.sigils = [];
     this.nextId = 1;
-    this.dropX = (BIN_LEFT + BIN_RIGHT) / 2;
+    this.dropX = (this.layout.binLeft + this.layout.binRight) / 2;
     this.score = 0;
     this.combo = 0;
     this.comboTime = 0;
@@ -153,7 +186,7 @@ export class PlanetMergeEngine {
     const rect = this.canvas.getBoundingClientRect();
     const pixelX = ((clientX - rect.left) / rect.width) * this.canvas.width;
     const x = (pixelX - this.viewOffsetX) / this.viewScale;
-    this.dropX = Math.max(BIN_LEFT + 24, Math.min(BIN_RIGHT - 24, x));
+    this.dropX = Math.max(this.layout.binLeft + 24, Math.min(this.layout.binRight - 24, x));
   }
 
   setMove(direction: number) {
@@ -170,7 +203,7 @@ export class PlanetMergeEngine {
       tier,
       comet,
       x: this.dropX,
-      y: 78,
+      y: this.layout.dropY,
       vx: 0,
       vy: 115,
       radius,
@@ -187,7 +220,7 @@ export class PlanetMergeEngine {
     this.current = this.upcoming;
     this.upcoming = nextDropKind(this.random, this.drops + 1, this.maxTier);
     this.message = comet ? "彗星已投放：可清除前两级小星球" : "寻找相同英灵，让她们相遇";
-    this.spawn(this.dropX, 82, comet ? "#fff3b0" : PLANET_TIERS[tier].color, 7);
+    this.spawn(this.dropX, this.layout.dropY + 4, comet ? "#fff3b0" : PLANET_TIERS[tier].color, 7);
     planetMergeAudio.drop(tier, comet);
     this.emitHud(true);
   }
@@ -223,7 +256,7 @@ export class PlanetMergeEngine {
     this.comboTime = Math.max(0, this.comboTime - delta);
     if (this.comboTime <= 0) this.combo = 0;
     this.screenPulse = Math.max(0, this.screenPulse - delta);
-    this.dropX = Math.max(BIN_LEFT + 24, Math.min(BIN_RIGHT - 24, this.dropX + this.moveDirection * 310 * delta));
+    this.dropX = Math.max(this.layout.binLeft + 24, Math.min(this.layout.binRight - 24, this.dropX + this.moveDirection * 310 * delta));
     this.accumulator = Math.min(0.06, this.accumulator + delta);
     let steps = 0;
     while (this.accumulator >= 1 / 120 && steps < 6) {
@@ -232,7 +265,7 @@ export class PlanetMergeEngine {
       steps += 1;
     }
     this.updateEffects(delta);
-    const dangerous = this.balls.some(isDangerous);
+    const dangerous = this.balls.some((ball) => isDangerous(ball, this.layout.warningY));
     this.danger = dangerous ? Math.min(1, this.danger + delta / 2) : Math.max(0, this.danger - delta * 1.8);
     if (this.danger >= 1) {
       this.finish("lost", "星球稳定越过警戒线，星仓已经装满");
@@ -267,21 +300,21 @@ export class PlanetMergeEngine {
       }
       ball.x += ball.vx * dt;
       ball.y += ball.vy * dt;
-      if (ball.x - ball.radius < BIN_LEFT) {
+      if (ball.x - ball.radius < this.layout.binLeft) {
         const impactSpeed = Math.max(0, -ball.vx);
-        ball.x = BIN_LEFT + ball.radius;
+        ball.x = this.layout.binLeft + ball.radius;
         if (impactSpeed > 48) this.onBoundaryImpact(ball, 1, 0, impactSpeed);
         ball.vx = impactSpeed * 0.54;
       }
-      if (ball.x + ball.radius > BIN_RIGHT) {
+      if (ball.x + ball.radius > this.layout.binRight) {
         const impactSpeed = Math.max(0, ball.vx);
-        ball.x = BIN_RIGHT - ball.radius;
+        ball.x = this.layout.binRight - ball.radius;
         if (impactSpeed > 48) this.onBoundaryImpact(ball, -1, 0, impactSpeed);
         ball.vx = -impactSpeed * 0.54;
       }
-      if (ball.y + ball.radius > BIN_FLOOR) {
+      if (ball.y + ball.radius > this.layout.binFloor) {
         const impactSpeed = Math.max(0, ball.vy);
-        ball.y = BIN_FLOOR - ball.radius;
+        ball.y = this.layout.binFloor - ball.radius;
         if (impactSpeed > 46) this.onBoundaryImpact(ball, 0, -1, impactSpeed);
         const floorBounce = Math.max(0.24, 0.47 - ball.radius / 480);
         ball.vy = -impactSpeed * floorBounce;
@@ -475,7 +508,7 @@ export class PlanetMergeEngine {
   }
 
   private panFor(x: number) {
-    return Math.max(-0.72, Math.min(0.72, ((x - PLANET_WIDTH / 2) / (PLANET_WIDTH / 2)) * 0.9));
+    return Math.max(-0.72, Math.min(0.72, ((x - this.layout.width / 2) / (this.layout.width / 2)) * 0.9));
   }
 
   private spawn(x: number, y: number, color: string, count: number) {
@@ -556,7 +589,7 @@ export class PlanetMergeEngine {
     c.fillStyle = "#070a21";
     c.fillRect(0, 0, this.canvas.width, this.canvas.height);
     c.restore();
-    c.drawImage(this.background, 0, 0, PLANET_WIDTH, PLANET_HEIGHT);
+    c.drawImage(this.background, 0, 0, this.layout.width, this.layout.height);
     this.drawBin(c);
     this.drawGuide(c);
     this.drawSigils(c);
@@ -601,15 +634,15 @@ export class PlanetMergeEngine {
     }
     if (this.screenPulse > 0) {
       c.fillStyle = `rgba(255,255,255,${this.screenPulse * 0.42})`;
-      c.fillRect(0, 0, PLANET_WIDTH, PLANET_HEIGHT);
+      c.fillRect(0, 0, this.layout.width, this.layout.height);
     }
     if (this.status === "paused") {
       c.fillStyle = "#080a20dc";
-      c.fillRect(0, 0, PLANET_WIDTH, PLANET_HEIGHT);
+      c.fillRect(0, 0, this.layout.width, this.layout.height);
       c.fillStyle = "#fff";
       c.textAlign = "center";
       c.font = "700 32px Georgia";
-      c.fillText("星海暂停", PLANET_WIDTH / 2, PLANET_HEIGHT / 2);
+      c.fillText("星海暂停", this.layout.width / 2, this.layout.height / 2);
     }
   }
 
@@ -685,30 +718,33 @@ export class PlanetMergeEngine {
   }
 
   private drawBackdrop(c: CanvasRenderingContext2D) {
-    const sky = c.createLinearGradient(0, 0, 0, PLANET_HEIGHT);
+    const { width, height } = this.layout;
+    const sky = c.createLinearGradient(0, 0, 0, height);
     sky.addColorStop(0, "#080b24");
     sky.addColorStop(0.48, "#171946");
     sky.addColorStop(1, "#080b23");
     c.fillStyle = sky;
-    c.fillRect(0, 0, PLANET_WIDTH, PLANET_HEIGHT);
+    c.fillRect(0, 0, width, height);
 
-    const violetNebula = c.createRadialGradient(180, 370, 20, 180, 370, 310);
+    const violetY = height * 0.7;
+    const violetNebula = c.createRadialGradient(width * 0.2, violetY, 20, width * 0.2, violetY, Math.min(380, height * 0.42));
     violetNebula.addColorStop(0, "#7d4fd34f");
     violetNebula.addColorStop(0.45, "#42349b24");
     violetNebula.addColorStop(1, "#17194600");
     c.fillStyle = violetNebula;
-    c.fillRect(0, 0, PLANET_WIDTH, PLANET_HEIGHT);
+    c.fillRect(0, 0, width, height);
 
-    const blueNebula = c.createRadialGradient(780, 160, 10, 780, 160, 280);
+    const blueNebula = c.createRadialGradient(width * 0.82, height * 0.22, 10, width * 0.82, height * 0.22, Math.min(330, height * 0.36));
     blueNebula.addColorStop(0, "#4eb9e845");
     blueNebula.addColorStop(0.44, "#3350bc1f");
     blueNebula.addColorStop(1, "#17194600");
     c.fillStyle = blueNebula;
-    c.fillRect(0, 0, PLANET_WIDTH, PLANET_HEIGHT);
+    c.fillRect(0, 0, width, height);
 
-    for (let i = 0; i < 92; i += 1) {
-      const x = (i * 157 + (i % 7) * 19) % PLANET_WIDTH;
-      const y = (i * 83 + (i % 5) * 11) % PLANET_HEIGHT;
+    const starCount = Math.round(92 * Math.max(1, height / PLANET_HEIGHT));
+    for (let i = 0; i < starCount; i += 1) {
+      const x = (i * 157 + (i % 7) * 19) % width;
+      const y = (i * 83 + (i % 5) * 11) % height;
       const size = 0.7 + (i % 4) * 0.55;
       c.globalAlpha = 0.18 + (i % 5) * 0.13;
       c.fillStyle = i % 9 === 0 ? "#ffe7a8" : i % 6 === 0 ? "#c9a9ff" : "#ccefff";
@@ -729,7 +765,7 @@ export class PlanetMergeEngine {
     c.globalAlpha = 1;
 
     c.save();
-    c.translate(480, 315);
+    c.translate(width / 2, height * 0.58);
     c.strokeStyle = "#c3a6ff17";
     c.lineWidth = 1;
     for (const radius of [112, 168, 226, 284]) {
@@ -776,29 +812,30 @@ export class PlanetMergeEngine {
   }
 
   private drawBin(c: CanvasRenderingContext2D) {
-    const glass = c.createLinearGradient(BIN_LEFT, 112, BIN_RIGHT, BIN_FLOOR);
+    const { binLeft, binRight, binTop, binFloor, warningY } = this.layout;
+    const glass = c.createLinearGradient(binLeft, binTop, binRight, binFloor);
     glass.addColorStop(0, "#10152b99");
     glass.addColorStop(0.45, "#12183dba");
     glass.addColorStop(1, "#060a20de");
     c.fillStyle = glass;
-    c.fillRect(BIN_LEFT, 112, BIN_RIGHT - BIN_LEFT, BIN_FLOOR - 112);
+    c.fillRect(binLeft, binTop, binRight - binLeft, binFloor - binTop);
 
     c.strokeStyle = "#8adfff1c";
     c.lineWidth = 1;
-    for (let x = BIN_LEFT + 32; x < BIN_RIGHT; x += 42) {
+    for (let x = binLeft + 32; x < binRight; x += 42) {
       c.beginPath();
-      c.moveTo(x, 112);
-      c.lineTo(x, BIN_FLOOR);
+      c.moveTo(x, binTop);
+      c.lineTo(x, binFloor);
       c.stroke();
     }
-    for (let y = 126; y < BIN_FLOOR; y += 42) {
+    for (let y = binTop + 14; y < binFloor; y += 42) {
       c.beginPath();
-      c.moveTo(BIN_LEFT, y);
-      c.lineTo(BIN_RIGHT, y);
+      c.moveTo(binLeft, y);
+      c.lineTo(binRight, y);
       c.stroke();
     }
 
-    const wall = c.createLinearGradient(BIN_LEFT - 10, 0, BIN_LEFT + 5, 0);
+    const wall = c.createLinearGradient(binLeft - 10, 0, binLeft + 5, 0);
     wall.addColorStop(0, "#27458e");
     wall.addColorStop(0.23, "#86e9ff");
     wall.addColorStop(0.48, "#e8fbff");
@@ -806,36 +843,36 @@ export class PlanetMergeEngine {
     c.shadowColor = "#4ccfff";
     c.shadowBlur = 12;
     c.fillStyle = wall;
-    c.fillRect(BIN_LEFT - 10, 104, 12, BIN_FLOOR - 96);
+    c.fillRect(binLeft - 10, binTop - 8, 12, binFloor - binTop + 16);
     c.save();
-    c.translate(BIN_RIGHT + 10, 0);
+    c.translate(binRight + 10, 0);
     c.scale(-1, 1);
     c.fillStyle = wall;
-    c.fillRect(0, 104, 12, BIN_FLOOR - 96);
+    c.fillRect(0, binTop - 8, 12, binFloor - binTop + 16);
     c.restore();
     c.shadowBlur = 0;
 
-    const floor = c.createLinearGradient(0, BIN_FLOOR, 0, BIN_FLOOR + 13);
+    const floor = c.createLinearGradient(0, binFloor, 0, binFloor + 13);
     floor.addColorStop(0, "#84ecff");
     floor.addColorStop(0.2, "#4068c2");
     floor.addColorStop(1, "#17245d");
     c.fillStyle = floor;
-    c.fillRect(BIN_LEFT - 10, BIN_FLOOR, BIN_RIGHT - BIN_LEFT + 20, 13);
+    c.fillRect(binLeft - 10, binFloor, binRight - binLeft + 20, 13);
     c.fillStyle = "#c5f7ff";
-    c.fillRect(BIN_LEFT, BIN_FLOOR, BIN_RIGHT - BIN_LEFT, 2);
+    c.fillRect(binLeft, binFloor, binRight - binLeft, 2);
 
     c.setLineDash([12, 8]);
     c.strokeStyle = this.danger > 0 ? `rgba(255,92,128,${0.45 + this.danger * 0.55})` : "#ff7b9b69";
     c.lineWidth = 3;
     c.beginPath();
-    c.moveTo(BIN_LEFT + 2, WARNING_Y);
-    c.lineTo(BIN_RIGHT - 2, WARNING_Y);
+    c.moveTo(binLeft + 2, warningY);
+    c.lineTo(binRight - 2, warningY);
     c.stroke();
     c.setLineDash([]);
     c.fillStyle = "#ffb0c1";
     c.font = "700 9px sans-serif";
-    c.textAlign = "right";
-    c.fillText("警戒线", BIN_LEFT - 18, WARNING_Y + 3);
+    c.textAlign = this.layout.portrait ? "left" : "right";
+    c.fillText("警戒线", this.layout.portrait ? binLeft + 8 : binLeft - 18, warningY - 7);
   }
 
   private drawGuide(c: CanvasRenderingContext2D) {
@@ -850,13 +887,13 @@ export class PlanetMergeEngine {
     c.shadowColor = c.strokeStyle;
     c.shadowBlur = 8;
     c.beginPath();
-    c.moveTo(this.dropX, 72);
-    c.lineTo(this.dropX, Math.max(100, WARNING_Y - 5));
+    c.moveTo(this.dropX, this.layout.dropY - 6);
+    c.lineTo(this.dropX, Math.max(this.layout.dropY + 22, this.layout.warningY - 5));
     c.stroke();
     c.setLineDash([]);
     c.globalAlpha = 0.72;
-    if (comet) this.drawComet(c, this.dropX, 70, radius, 0);
-    else this.drawPlanetShape(c, this.dropX, 70, radius, tier, 0);
+    if (comet) this.drawComet(c, this.dropX, this.layout.dropY - 8, radius, 0);
+    else this.drawPlanetShape(c, this.dropX, this.layout.dropY - 8, radius, tier, 0);
     c.restore();
   }
 

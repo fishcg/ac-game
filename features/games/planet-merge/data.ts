@@ -6,6 +6,47 @@ export const BIN_FLOOR = 505;
 export const WARNING_Y = 170;
 export const MAX_PLANETS = 58;
 
+export type PlanetLayout = {
+  width: number;
+  height: number;
+  binLeft: number;
+  binRight: number;
+  binTop: number;
+  binFloor: number;
+  warningY: number;
+  dropY: number;
+  portrait: boolean;
+};
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+
+/**
+ * 保持物理世界等比缩放，同时让竖屏设备获得真正的纵向星仓。
+ * 不能只拉伸 canvas，否则球会变成椭圆，触摸坐标也会失真。
+ */
+export function createPlanetLayout(viewWidth: number, viewHeight: number): PlanetLayout {
+  const aspect = Math.max(0.35, viewWidth / Math.max(1, viewHeight));
+  const portrait = aspect < 0.9;
+  const width = portrait ? 540 : PLANET_WIDTH;
+  const height = Math.round(clamp(width / aspect, portrait ? 760 : PLANET_HEIGHT, portrait ? 1120 : 680));
+  const binLeft = portrait ? 32 : BIN_LEFT;
+  const binRight = portrait ? width - 32 : BIN_RIGHT;
+  const binTop = portrait ? 142 : 112;
+  const binFloor = height - (portrait ? 34 : 35);
+
+  return {
+    width,
+    height,
+    binLeft,
+    binRight,
+    binTop,
+    binFloor,
+    warningY: portrait ? Math.min(binTop + 138, binFloor - 360) : WARNING_Y,
+    dropY: portrait ? 96 : 78,
+    portrait,
+  };
+}
+
 export const PLANET_TIERS = [
   { name: "星尘泡泡", radius: 14, color: "#7be8ff", shade: "#3878d8", score: 12 },
   { name: "薄荷卫星", radius: 18, color: "#7df0ba", shade: "#2d9b83", score: 28 },

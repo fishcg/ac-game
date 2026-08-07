@@ -9,10 +9,21 @@ const PORTRAIT_FULLSCREEN_GAMES = new Set<GameId>([
   "thunder-wing",
   "planet-merge",
   "bamboo-cicada",
+  "orbit-dash",
+  "stack-up",
+  "memory-pairs",
+  "beat-rush",
+  "hamster-roll",
+  "minesweeper",
+  "go",
 ]);
 
+export function preferredMobileOrientation(gameId: GameId): "portrait" | "landscape" {
+  return PORTRAIT_FULLSCREEN_GAMES.has(gameId) ? "portrait" : "landscape";
+}
+
 export function prefersLandscapeFullscreen(gameId: GameId) {
-  return !PORTRAIT_FULLSCREEN_GAMES.has(gameId);
+  return preferredMobileOrientation(gameId) === "landscape";
 }
 
 export function isPortraitViewport() {

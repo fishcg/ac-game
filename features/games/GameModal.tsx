@@ -27,7 +27,7 @@ import { FateChamber } from "./fate-chamber/Game";
 import { PlanetMerge } from "./planet-merge/Game";
 import { GuiyangMahjong } from "./guiyang-mahjong/Game";
 import { GameViewport } from "./GameViewport";
-import { isPortraitViewport, lockLandscapeOrientation, lockPortraitOrientation, prefersLandscapeFullscreen, unlockOrientation } from "./mobileOrientation";
+import { isPortraitViewport, lockLandscapeOrientation, lockPortraitOrientation, preferredMobileOrientation, prefersLandscapeFullscreen, unlockOrientation } from "./mobileOrientation";
 
 type Props = {
   game: GameInfo;
@@ -43,6 +43,7 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
   const modalRef = useRef<HTMLDivElement>(null);
   const fullscreenRef = useRef(false);
   const preferLandscape = prefersLandscapeFullscreen(game.id);
+  const mobileOrientation = preferredMobileOrientation(game.id);
 
   useEffect(() => { fullscreenRef.current = fullscreen; }, [fullscreen]);
 
@@ -129,7 +130,7 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
 
   return (
     <div ref={modalRef} className="game-modal" role="dialog" aria-modal="true" aria-label={game.title}>
-      <div data-game-id={game.id} className={`game-modal__frame ${fullscreen ? "game-modal__frame--fullscreen" : ""} ${landscapeFallback ? "game-modal__frame--landscape-fallback" : ""}`}>
+      <div data-game-id={game.id} data-mobile-orientation={mobileOrientation} className={`game-modal__frame ${fullscreen ? "game-modal__frame--fullscreen" : ""} ${landscapeFallback ? "game-modal__frame--landscape-fallback" : ""}`}>
         <header className="game-modal__header">
           <div>
             <span className="game-modal__eyebrow">正在游玩</span>

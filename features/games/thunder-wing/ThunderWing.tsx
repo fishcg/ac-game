@@ -13,6 +13,15 @@ import styles from "./ThunderWing.module.css";
 
 const INITIAL_HUD: ThunderHud = { score: 0, lives: 5, shield: 100, power: 2, weapon: "cannon", wingmen: 0, wave: 1, bossHp: null, bossName: null, bossPhase: null };
 const WEAPON_LABEL = { cannon: "脉冲炮", laser: "贯穿激光", spread: "散射弹" } as const;
+const MAX_GAME_HEIGHT = 1120;
+
+function fitCanvasToViewport(canvas: HTMLCanvasElement) {
+  const rect = canvas.getBoundingClientRect();
+  const height = Math.max(GAME_HEIGHT, Math.min(MAX_GAME_HEIGHT, Math.round(GAME_WIDTH * rect.height / Math.max(1, rect.width))));
+  if (canvas.width !== GAME_WIDTH) canvas.width = GAME_WIDTH;
+  if (canvas.height !== height) canvas.height = height;
+  return height;
+}
 
 export function ThunderWing({ bestScore, onScore }: MiniGameProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -42,7 +51,9 @@ export function ThunderWing({ bestScore, onScore }: MiniGameProps) {
 
   useEffect(() => {
     if (status !== "running" || !imagesRef.current || !canvasRef.current) return;
-    const context = canvasRef.current.getContext("2d");
+    const canvas = canvasRef.current;
+    const logicalHeight = fitCanvasToViewport(canvas);
+    const context = canvas.getContext("2d");
     if (!context) return;
     const engine = new ThunderWingEngine(context, imagesRef.current, {
       onHud: setHud,
@@ -51,8 +62,13 @@ export function ThunderWing({ bestScore, onScore }: MiniGameProps) {
         onScore(score);
         setStatus("over");
       },
-    });
+    }, GAME_WIDTH, logicalHeight);
     engineRef.current = engine;
+    const resizeObserver = new ResizeObserver(() => {
+      const nextHeight = fitCanvasToViewport(canvas);
+      engine.resize(GAME_WIDTH, nextHeight);
+    });
+    resizeObserver.observe(canvas);
     let frame = 0;
     let previous = performance.now();
     const animate = (now: number) => {
@@ -65,6 +81,7 @@ export function ThunderWing({ bestScore, onScore }: MiniGameProps) {
     frame = requestAnimationFrame(animate);
     return () => {
       cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
       engineRef.current = null;
     };
   }, [onScore, session, status]);
@@ -104,8 +121,8 @@ export function ThunderWing({ bestScore, onScore }: MiniGameProps) {
     if (status !== "running") return;
     const rect = event.currentTarget.getBoundingClientRect();
     engineRef.current?.setPlayerTarget(
-      ((event.clientX - rect.left) / rect.width) * GAME_WIDTH,
-      ((event.clientY - rect.top) / rect.height) * GAME_HEIGHT,
+      ((event.clientX - rect.left) / rect.width) * event.currentTarget.width,
+      ((event.clientY - rect.top) / rect.height) * event.currentTarget.height,
     );
   };
 

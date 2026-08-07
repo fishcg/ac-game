@@ -40,6 +40,8 @@ const BOSS_NAMES: Record<BossVariant, string> = {
 };
 
 export class ThunderWingEngine {
+  private width: number;
+  private height: number;
   private player: PlayerState = {
     x: GAME_WIDTH / 2,
     y: GAME_HEIGHT - 100,
@@ -72,24 +74,55 @@ export class ThunderWingEngine {
   private id = 0;
   private ended = false;
   private hudCooldown = 0;
-  private stars = Array.from({ length: 70 }, (_, index) => ({
-    x: (index * 83.17) % GAME_WIDTH,
-    y: (index * 137.31) % GAME_HEIGHT,
-    size: 0.8 + (index % 4) * 0.55,
-    speed: 28 + (index % 5) * 16,
-  }));
+  private stars: Array<{ x: number; y: number; size: number; speed: number }> = [];
 
   constructor(
     private context: CanvasRenderingContext2D,
     private images: ThunderImages,
     private callbacks: EngineCallbacks,
+    width = GAME_WIDTH,
+    height = GAME_HEIGHT,
   ) {
+    this.width = width;
+    this.height = height;
+    this.player.x = width / 2;
+    this.player.y = height - 100;
+    this.player.targetX = this.player.x;
+    this.player.targetY = this.player.y;
+    this.stars = Array.from({ length: Math.round(70 * Math.max(1, height / GAME_HEIGHT)) }, (_, index) => ({
+      x: (index * 83.17) % width,
+      y: (index * 137.31) % height,
+      size: 0.8 + (index % 4) * 0.55,
+      speed: 28 + (index % 5) * 16,
+    }));
     this.emitHud();
   }
 
+  resize(width: number, height: number) {
+    if (width === this.width && height === this.height) return;
+    const scaleX = width / Math.max(1, this.width);
+    const scaleY = height / Math.max(1, this.height);
+    const migrate = (entity: { x: number; y: number }) => {
+      entity.x *= scaleX;
+      entity.y *= scaleY;
+    };
+    migrate(this.player);
+    this.player.targetX *= scaleX;
+    this.player.targetY *= scaleY;
+    for (const collection of [this.bullets, this.enemies, this.powerups, this.particles, this.stars]) {
+      collection.forEach(migrate);
+    }
+    this.width = width;
+    this.height = height;
+    this.player.x = clamp(this.player.x, 35, width - 35);
+    this.player.y = clamp(this.player.y, 90, height - 55);
+    this.player.targetX = clamp(this.player.targetX, 35, width - 35);
+    this.player.targetY = clamp(this.player.targetY, 90, height - 55);
+  }
+
   setPlayerTarget(x: number, y: number) {
-    this.player.targetX = clamp(x, 35, GAME_WIDTH - 35);
-    this.player.targetY = clamp(y, 90, GAME_HEIGHT - 55);
+    this.player.targetX = clamp(x, 35, this.width - 35);
+    this.player.targetY = clamp(y, 90, this.height - 55);
   }
 
   cycleWeapon() {
@@ -130,7 +163,7 @@ export class ThunderWingEngine {
 
   draw() {
     const context = this.context;
-    context.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    context.clearRect(0, 0, this.width, this.height);
     this.drawBackground();
     this.drawPowerups();
     this.drawPlayerLaser();
@@ -146,8 +179,8 @@ export class ThunderWingEngine {
     if (keyboardX || keyboardY) {
       const length = Math.hypot(keyboardX, keyboardY) || 1;
       const moveSpeed = 650;
-      this.player.x = clamp(this.player.x + (keyboardX / length) * moveSpeed * delta, 35, GAME_WIDTH - 35);
-      this.player.y = clamp(this.player.y + (keyboardY / length) * moveSpeed * delta, 90, GAME_HEIGHT - 55);
+      this.player.x = clamp(this.player.x + (keyboardX / length) * moveSpeed * delta, 35, this.width - 35);
+      this.player.y = clamp(this.player.y + (keyboardY / length) * moveSpeed * delta, 90, this.height - 55);
       this.player.targetX = this.player.x;
       this.player.targetY = this.player.y;
     } else {
@@ -240,7 +273,7 @@ export class ThunderWingEngine {
     this.enemies.push({
       id: this.id += 1,
       kind,
-      x: kind === "boss" ? GAME_WIDTH / 2 : 45 + Math.random() * (GAME_WIDTH - 90),
+      x: kind === "boss" ? this.width / 2 : 45 + Math.random() * (this.width - 90),
       y: kind === "boss" ? -80 : -55,
       vx: kind === "boss" ? 105 : 0,
       vy: stats.speed * (1 + Math.min(0.65, this.elapsed / 100)),
@@ -276,7 +309,7 @@ export class ThunderWingEngine {
       bullet.x += bullet.vx * delta;
       bullet.y += bullet.vy * delta;
     });
-    this.bullets = this.bullets.filter((bullet) => bullet.y > -80 && bullet.y < GAME_HEIGHT + 80 && bullet.x > -40 && bullet.x < GAME_WIDTH + 40);
+    this.bullets = this.bullets.filter((bullet) => bullet.y > -80 && bullet.y < this.height + 80 && bullet.x > -40 && bullet.x < this.width + 40);
   }
 
   private updateEnemies(delta: number) {
@@ -286,32 +319,32 @@ export class ThunderWingEngine {
         if (enemy.y < 110) enemy.y += enemy.vy * delta;
         else {
           if (enemy.bossVariant === "azure") {
-            enemy.x = GAME_WIDTH / 2 + Math.sin(enemy.phase * 0.82) * 178;
+            enemy.x = this.width / 2 + Math.sin(enemy.phase * 0.82) * Math.min(178, this.width * 0.33);
             enemy.y = 112 + Math.sin(enemy.phase * 1.55) * 22;
           } else if (enemy.bossVariant === "verdant") {
             enemy.x += enemy.vx * delta * 0.72;
             enemy.y = 108 + Math.sin(enemy.phase * 2.3) * 28;
-            if (enemy.x < 72 || enemy.x > GAME_WIDTH - 72) enemy.vx *= -1;
+            if (enemy.x < 72 || enemy.x > this.width - 72) enemy.vx *= -1;
           } else {
             enemy.x += enemy.vx * delta;
-            if (enemy.x < 80 || enemy.x > GAME_WIDTH - 80) enemy.vx *= -1;
+            if (enemy.x < 80 || enemy.x > this.width - 80) enemy.vx *= -1;
           }
         }
       } else {
         enemy.y += enemy.vy * delta;
         if (enemy.kind === "zigzag") enemy.x += Math.sin(enemy.phase * 4.3) * 125 * delta;
         if (enemy.kind === "scout") enemy.x += Math.sin(enemy.phase * 2.1) * 42 * delta;
-        enemy.x = clamp(enemy.x, 32, GAME_WIDTH - 32);
+        enemy.x = clamp(enemy.x, 32, this.width - 32);
       }
       enemy.shootCooldown -= delta;
-      if (this.elapsed > 4 && enemy.shootCooldown <= 0 && enemy.y > 25 && enemy.y < GAME_HEIGHT - 180) {
+      if (this.elapsed > 4 && enemy.shootCooldown <= 0 && enemy.y > 25 && enemy.y < this.height - 180) {
         this.fireEnemyWeapon(enemy);
         const enraged = enemy.kind === "boss" && enemy.hp / enemy.maxHp <= 0.5;
         const base = enemy.kind === "boss" ? (enraged ? 0.55 : 0.84) : enemy.kind === "tank" ? 1.7 : 2.25;
         enemy.shootCooldown = Math.max(0.62, base - this.elapsed * 0.004) * (0.88 + Math.random() * 0.35);
       }
     });
-    this.enemies = this.enemies.filter((enemy) => enemy.y <= GAME_HEIGHT + 75);
+    this.enemies = this.enemies.filter((enemy) => enemy.y <= this.height + 75);
   }
 
   private fireEnemyWeapon(enemy: Enemy) {
@@ -366,7 +399,7 @@ export class ThunderWingEngine {
       powerup.y += powerup.vy * delta;
       powerup.spin += delta * 4;
     });
-    this.powerups = this.powerups.filter((powerup) => powerup.y < GAME_HEIGHT + 50);
+    this.powerups = this.powerups.filter((powerup) => powerup.y < this.height + 50);
   }
 
   private updatePlayerLaser(delta: number) {
@@ -531,19 +564,19 @@ export class ThunderWingEngine {
   private drawBackground() {
     const context = this.context;
     const background = this.images.background;
-    for (let x = 0; x < GAME_WIDTH; x += 256) {
-      for (let y = -256 + this.backgroundOffset; y < GAME_HEIGHT; y += 256) context.drawImage(background, x, y, 256, 256);
+    for (let x = 0; x < this.width; x += 256) {
+      for (let y = -256 + this.backgroundOffset; y < this.height; y += 256) context.drawImage(background, x, y, 256, 256);
     }
-    const gradient = context.createLinearGradient(0, 0, 0, GAME_HEIGHT);
+    const gradient = context.createLinearGradient(0, 0, 0, this.height);
     gradient.addColorStop(0, "rgba(10, 8, 38, .15)");
     gradient.addColorStop(0.55, "rgba(12, 10, 42, .05)");
     gradient.addColorStop(1, "rgba(2, 6, 24, .56)");
     context.fillStyle = gradient;
-    context.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+    context.fillRect(0, 0, this.width, this.height);
     context.fillStyle = "#dffbff";
     this.stars.forEach((star) => {
       star.y += star.speed / 60;
-      if (star.y > GAME_HEIGHT) star.y = 0;
+      if (star.y > this.height) star.y = 0;
       context.globalAlpha = 0.3 + (star.size % 1) * 0.6;
       context.fillRect(star.x, star.y, star.size, star.size * 2.3);
     });
