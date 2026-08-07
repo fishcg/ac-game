@@ -105,3 +105,13 @@
 .tarotCards i{margin:14px 0}
 .touchPad{opacity:.75;transform:scale(.86);transform-origin:bottom left}
 }
+@media(max-width:900px) and (orientation:portrait){
+:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .intro,
+:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .choiceOverlay,
+:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .result{inset:-250px 0}
+:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .hud{top:-220px}
+:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .boss{top:-42px!important;right:10px;left:auto;width:150px;transform:none}
+:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .tarotStack{top:-76px}
+:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .buff{top:-42px}
+:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .touchPad{bottom:-190px}
+}

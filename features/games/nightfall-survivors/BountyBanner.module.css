@@ -24,3 +24,4 @@
 .banner i b { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#ff9d4d,#ffe77d); box-shadow: 0 0 8px #ffc456; transition: width .1s linear; }
 .banner small { grid-column: 1/-1; color: #ffffff6f; font-size: 5px; }
 @media(max-width:760px){.banner{top:98px;width:190px}.banner small{display:none}}
+@media(max-width:900px) and (orientation:portrait){:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .banner{top:auto;right:10px;bottom:-240px;left:auto;transform:none}}

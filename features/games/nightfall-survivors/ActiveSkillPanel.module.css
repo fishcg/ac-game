@@ -47,3 +47,7 @@
   .panel button { width: 47px; min-height: 43px; justify-content: center; }
   .panel span { display: none; }
 }
+
+@media (max-width: 900px) and (orientation: portrait) {
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .panel { bottom: -65px; }
+}

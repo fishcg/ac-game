@@ -20,3 +20,4 @@
 .banner span { color: white; font-family: Georgia, serif; font-size: 15px; }
 .active { animation: pulse .65s ease-in-out infinite alternate; }
 @keyframes pulse { to { transform: translateX(-50%) scale(1.04); box-shadow: 0 0 34px #ff504f70; } }
+@media(max-width:900px) and (orientation:portrait){:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .banner{top:-50px;bottom:auto}}

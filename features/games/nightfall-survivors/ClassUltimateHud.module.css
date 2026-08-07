@@ -52,3 +52,8 @@
   .ultimate strong { font-size: 11px; }
   .secondary { bottom: 72px; }
 }
+
+@media (max-width: 900px) and (orientation: portrait) {
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .ultimate { bottom: -190px; }
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .secondary { bottom: -125px; }
+}

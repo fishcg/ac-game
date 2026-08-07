@@ -9,3 +9,7 @@
   .wrap { left: 10px; top: 33px; grid-template-columns: auto 90px auto; }
   .wrap > em { max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+
+@media (max-width: 900px) and (orientation: portrait) {
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .wrap { top: -170px; }
+}

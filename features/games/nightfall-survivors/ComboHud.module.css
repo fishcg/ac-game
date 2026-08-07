@@ -23,3 +23,4 @@
 .fever i b { background: linear-gradient(90deg,#ff755e,#ffd45e,#fff3ae); box-shadow: 0 0 9px #ffc14f; }
 @keyframes fever { to { transform: translateY(-2px); box-shadow: 0 0 36px #ff9d497d; } }
 @media(max-width:760px){.combo{left:10px;bottom:145px;width:92px}.combo em{display:none}}
+@media(max-width:900px) and (orientation:portrait){:global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .combo{bottom:-240px}}

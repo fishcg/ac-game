@@ -7,3 +7,4 @@
 .best { position: absolute; z-index: 4; right: 18px; bottom: 17px; color: #ffffff78; font-size: 8px; pointer-events: none; }
 @keyframes pop { from { transform: scale(.6); } to { transform: scale(1); } }
 @media (max-width: 680px) { .hud { left: 8px; right: 8px; top: 8px; }.hud > div { min-width: 0; flex: 1; padding: 6px 7px; }.hud strong { font-size: 12px; }.hud button { width: 32px; }.overlay ul { flex-direction: column; gap: 5px; }.queue { bottom: 13px; }.best { display: none; } }
+@media (max-width:900px) and (orientation:portrait) { :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .hud { top:-58px; } :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .queue { bottom:-58px; } :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .progress { bottom:-70px; } }

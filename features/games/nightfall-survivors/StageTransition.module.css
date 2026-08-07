@@ -40,3 +40,7 @@
 @keyframes content-rise { 0% { opacity: 0; transform: translateY(24px) scale(.95); } 20%,82% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translateY(-16px) scale(1.03); } }
 @keyframes diamond-pulse { to { transform: scale(1.22) rotate(45deg); } }
 @keyframes transition-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (max-width: 900px) and (orientation: portrait) {
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .overlay { inset: -250px 0; }
+}

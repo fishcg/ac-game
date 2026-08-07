@@ -31,3 +31,10 @@
   .panel { top: 58px; right: 9px; width: 175px; }
   .list > div:nth-child(n+4) { display: none; }
 }
+
+@media (max-width: 900px) and (orientation: portrait) {
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .panel { top: -140px; right: 8px; width: 140px; padding: 8px; }
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .panel header { margin-bottom: 5px; }
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .list > div { display: none; }
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .list > div:first-child { display: block; }
+}

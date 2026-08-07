@@ -38,6 +38,7 @@ const BOSS_NAMES: Record<BossVariant, string> = {
   azure: "苍蓝母舰",
   verdant: "翠光收割者",
 };
+const ENEMY_SAFE_TOP = 105;
 
 export class ThunderWingEngine {
   private width: number;
@@ -240,7 +241,7 @@ export class ThunderWingEngine {
     if (this.elapsed >= this.nextWingmanDrop && this.player.wingmen < 2) {
       this.powerups.push({
         x: this.player.x,
-        y: 30,
+        y: ENEMY_SAFE_TOP,
         vx: 0,
         vy: 115,
         radius: 18,
@@ -274,7 +275,7 @@ export class ThunderWingEngine {
       id: this.id += 1,
       kind,
       x: kind === "boss" ? this.width / 2 : 45 + Math.random() * (this.width - 90),
-      y: kind === "boss" ? -80 : -55,
+      y: kind === "boss" ? ENEMY_SAFE_TOP - 45 : ENEMY_SAFE_TOP,
       vx: kind === "boss" ? 105 : 0,
       vy: stats.speed * (1 + Math.min(0.65, this.elapsed / 100)),
       radius: stats.radius,
@@ -316,14 +317,14 @@ export class ThunderWingEngine {
     this.enemies.forEach((enemy) => {
       enemy.phase += delta;
       if (enemy.kind === "boss") {
-        if (enemy.y < 110) enemy.y += enemy.vy * delta;
+        if (enemy.y < 185) enemy.y += enemy.vy * delta;
         else {
           if (enemy.bossVariant === "azure") {
             enemy.x = this.width / 2 + Math.sin(enemy.phase * 0.82) * Math.min(178, this.width * 0.33);
-            enemy.y = 112 + Math.sin(enemy.phase * 1.55) * 22;
+            enemy.y = 187 + Math.sin(enemy.phase * 1.55) * 22;
           } else if (enemy.bossVariant === "verdant") {
             enemy.x += enemy.vx * delta * 0.72;
-            enemy.y = 108 + Math.sin(enemy.phase * 2.3) * 28;
+            enemy.y = 183 + Math.sin(enemy.phase * 2.3) * 28;
             if (enemy.x < 72 || enemy.x > this.width - 72) enemy.vx *= -1;
           } else {
             enemy.x += enemy.vx * delta;

@@ -71,3 +71,12 @@
   color: #ffffff63;
   font-size: 7px;
 }
+
+@media (max-width: 900px) and (orientation: portrait) {
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .overlay { inset: -250px 0; }
+  :global(.game-modal__frame:not(.game-modal__frame--landscape-fallback)) .pauseButton {
+    top: -48px;
+    right: 10px;
+    bottom: auto;
+  }
+}

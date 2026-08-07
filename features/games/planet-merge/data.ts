@@ -31,8 +31,8 @@ export function createPlanetLayout(viewWidth: number, viewHeight: number): Plane
   const height = Math.round(clamp(width / aspect, portrait ? 760 : PLANET_HEIGHT, portrait ? 1120 : 680));
   const binLeft = portrait ? 32 : BIN_LEFT;
   const binRight = portrait ? width - 32 : BIN_RIGHT;
-  const binTop = portrait ? 142 : 112;
-  const binFloor = height - (portrait ? 34 : 35);
+  const binTop = portrait ? 205 : 112;
+  const binFloor = height - (portrait ? 150 : 35);
 
   return {
     width,
@@ -42,7 +42,7 @@ export function createPlanetLayout(viewWidth: number, viewHeight: number): Plane
     binTop,
     binFloor,
     warningY: portrait ? Math.min(binTop + 138, binFloor - 360) : WARNING_Y,
-    dropY: portrait ? 96 : 78,
+    dropY: portrait ? 170 : 78,
     portrait,
   };
 }
