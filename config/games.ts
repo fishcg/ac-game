@@ -1,4 +1,4 @@
-export type GameId = "worm-front" | "prism-dash" | "rune-peg" | "fate-chamber" | "planet-merge" | "nightfall-survivors" | "iron-front" | "thunder-wing" | "orbit-dash" | "stack-up" | "memory-pairs" | "beat-rush" | "hamster-roll" | "gold-miner" | "oil-tycoon" | "minesweeper" | "go" | "guiyang-mahjong" | "zuma" | "perfect-parking" | "moon-swing";
+export type GameId = "worm-front" | "prism-dash" | "rune-peg" | "fate-chamber" | "planet-merge" | "nightfall-survivors" | "iron-front" | "thunder-wing" | "orbit-dash" | "stack-up" | "bamboo-cicada" | "memory-pairs" | "beat-rush" | "hamster-roll" | "gold-miner" | "oil-tycoon" | "minesweeper" | "go" | "guiyang-mahjong" | "zuma" | "perfect-parking" | "moon-swing";
 
 export type GameInfo = {
   id: GameId;
@@ -9,7 +9,7 @@ export type GameInfo = {
   players: string;
   duration: string;
   accent: string;
-  art: "worm" | "prism" | "peg" | "chamber" | "planetMerge" | "nightfall" | "iron" | "thunder" | "orbit" | "stack" | "memory" | "beat" | "hamster" | "miner" | "oil" | "minesweeper" | "go" | "mahjong" | "zuma" | "parking" | "moon";
+  art: "worm" | "prism" | "peg" | "chamber" | "planetMerge" | "nightfall" | "iron" | "thunder" | "orbit" | "stack" | "bambooCicada" | "memory" | "beat" | "hamster" | "miner" | "oil" | "minesweeper" | "go" | "mahjong" | "zuma" | "parking" | "moon";
   controls: string;
 };
 
@@ -105,6 +105,18 @@ export const games: GameInfo[] = [
     accent: "#6f71e8",
     art: "stack",
     controls: "空格 / 点击屏幕放下方块",
+  },
+  {
+    id: "bamboo-cicada",
+    title: "竹知了·鸣夏",
+    eyebrow: "夏夜玩物",
+    description: "按住画圆甩响竹知了，把圈速稳定在目标鸣律，完成三段会随手速变化的夏夜蝉鸣。",
+    category: "治愈",
+    players: "NEW",
+    duration: "1–2 分钟",
+    accent: "#e1b75f",
+    art: "bambooCicada",
+    controls: "鼠标或手指按住画圆，速度进入目标区会积累鸣律；红色警告时放慢，P 暂停",
   },
   {
     id: "memory-pairs",

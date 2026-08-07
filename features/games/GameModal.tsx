@@ -6,6 +6,7 @@ import { CloseIcon, FullscreenExitIcon, FullscreenIcon, TrophyIcon, VolumeIcon, 
 import { gameAudio } from "@/lib/audio/gameAudio";
 import { OrbitDash } from "./orbit-dash/OrbitDash";
 import { StackUp } from "./stack-up/StackUp";
+import { BambooCicada } from "./bamboo-cicada/Game";
 import { MemoryPairs } from "./memory-pairs/MemoryPairs";
 import { BeatRush } from "./beat-rush/BeatRush";
 import { ThunderWing } from "./thunder-wing/ThunderWing";
@@ -39,17 +40,15 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
   const [muted, setMuted] = useState(() => gameAudio.isMuted());
   const [fullscreen, setFullscreen] = useState(false);
   const [landscapeFallback, setLandscapeFallback] = useState(false);
-  const frameRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const fullscreenRef = useRef(false);
-  const orientationLockedRef = useRef(false);
   const preferLandscape = prefersLandscapeFullscreen(game.id);
 
   useEffect(() => { fullscreenRef.current = fullscreen; }, [fullscreen]);
 
   useEffect(() => {
-    const frame = frameRef.current;
+    const modal = modalRef.current;
     const releaseOrientation = () => {
-      orientationLockedRef.current = false;
       setLandscapeFallback(false);
       unlockOrientation();
     };
@@ -63,7 +62,7 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
       onClose();
     };
     const syncFullscreen = () => {
-      const active = document.fullscreenElement === frame;
+      const active = document.fullscreenElement === modal;
       setFullscreen(active);
       if (!active) releaseOrientation();
     };
@@ -72,7 +71,7 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
         setLandscapeFallback(false);
         return;
       }
-      setLandscapeFallback(!orientationLockedRef.current && isPortraitViewport());
+      setLandscapeFallback(isPortraitViewport());
     };
     window.addEventListener("keydown", close);
     window.addEventListener("resize", syncOrientationFallback);
@@ -84,7 +83,7 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
       window.removeEventListener("resize", syncOrientationFallback);
       screen.orientation?.removeEventListener?.("change", syncOrientationFallback);
       document.removeEventListener("fullscreenchange", syncFullscreen);
-      if (document.fullscreenElement === frame) void document.exitFullscreen();
+      if (document.fullscreenElement === modal) void document.exitFullscreen();
       releaseOrientation();
       document.body.style.overflow = "";
     };
@@ -104,7 +103,6 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
       return;
     }
     if (fullscreen) {
-      orientationLockedRef.current = false;
       setLandscapeFallback(false);
       unlockOrientation();
       setFullscreen(false);
@@ -112,19 +110,19 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
     }
 
     try {
-      await frameRef.current?.requestFullscreen();
+      await modalRef.current?.requestFullscreen();
     } catch { /* Safari iOS 等环境使用 CSS 全屏兜底。 */ }
 
     setFullscreen(true);
     if (!preferLandscape) return;
 
-    orientationLockedRef.current = await lockLandscapeOrientation();
-    setLandscapeFallback(!orientationLockedRef.current && isPortraitViewport());
+    await lockLandscapeOrientation();
+    setLandscapeFallback(isPortraitViewport());
   };
 
   return (
-    <div className="game-modal" role="dialog" aria-modal="true" aria-label={game.title}>
-      <div ref={frameRef} className={`game-modal__frame ${fullscreen ? "game-modal__frame--fullscreen" : ""} ${landscapeFallback ? "game-modal__frame--landscape-fallback" : ""}`}>
+    <div ref={modalRef} className="game-modal" role="dialog" aria-modal="true" aria-label={game.title}>
+      <div className={`game-modal__frame ${fullscreen ? "game-modal__frame--fullscreen" : ""} ${landscapeFallback ? "game-modal__frame--landscape-fallback" : ""}`}>
         <header className="game-modal__header">
           <div>
             <span className="game-modal__eyebrow">正在游玩</span>
@@ -146,6 +144,7 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
             {game.id === "planet-merge" && <PlanetMerge bestScore={bestScore} onScore={onScore} />}
             {game.id === "orbit-dash" && <OrbitDash bestScore={bestScore} onScore={onScore} />}
             {game.id === "stack-up" && <StackUp bestScore={bestScore} onScore={onScore} />}
+            {game.id === "bamboo-cicada" && <BambooCicada bestScore={bestScore} onScore={onScore} />}
             {game.id === "memory-pairs" && <MemoryPairs bestScore={bestScore} onScore={onScore} />}
             {game.id === "beat-rush" && <BeatRush bestScore={bestScore} onScore={onScore} />}
             {game.id === "thunder-wing" && <ThunderWing bestScore={bestScore} onScore={onScore} />}

@@ -18,6 +18,7 @@ const FIXED_VIEWPORTS: Partial<Record<GameId, ViewportSpec>> = {
   zuma: LANDSCAPE_16_9,
   "perfect-parking": LANDSCAPE_16_9,
   "moon-swing": LANDSCAPE_16_9,
+  "bamboo-cicada": LANDSCAPE_16_9,
 };
 
 export function GameViewport({ gameId, children }: { gameId: GameId; children: ReactNode }) {
