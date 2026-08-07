@@ -116,7 +116,7 @@ export const games: GameInfo[] = [
     duration: "1–2 分钟",
     accent: "#e1b75f",
     art: "bambooCicada",
-    controls: "鼠标或手指按住画圆，速度进入目标区会积累鸣律；红色警告时放慢，P 暂停",
+    controls: "手机开启体感后甩动游玩，也可用鼠标或手指按住画圆；速度进入目标区会积累鸣律，红色警告时放慢，P 暂停",
   },
   {
     id: "memory-pairs",

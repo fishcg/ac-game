@@ -24,6 +24,8 @@ export type BambooHud = {
   phraseProgress: number;
   judgement: SpeedJudgement;
   direction: -1 | 0 | 1;
+  motionActive: boolean;
+  motionDrive: number;
 };
 
 export type BambooFinishReason = "concert-complete" | "time-up" | "rope-broken";

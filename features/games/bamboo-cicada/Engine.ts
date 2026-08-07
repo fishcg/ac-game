@@ -1,6 +1,7 @@
 import { BAMBOO_PALETTE } from "./assets";
 import { PHRASES, ROUND_SECONDS } from "./data";
 import { advancePhraseProgress, advanceTension, completionBonus, finalScore, frameScore, judgeSpeed } from "./rules";
+import type { MotionSignal } from "./motion";
 import type { BambooEngineCallbacks, BambooFinishReason, BambooGameStatus, BambooHud, SpeedJudgement } from "./types";
 
 const TAU = Math.PI * 2;
@@ -54,6 +55,7 @@ export class BambooCicadaEngine {
   private glyphs: Glyph[] = [];
   private trail: TrailPoint[] = [];
   private fireflies: Firefly[] = [];
+  private motion = { enabled: false, active: false, drive: 0, targetDrive: 0, direction: 1 as -1 | 1, phase: 0, lastEvent: 0 };
 
   constructor(canvas: HTMLCanvasElement, callbacks: BambooEngineCallbacks) {
     const context = canvas.getContext("2d");
@@ -89,6 +91,10 @@ export class BambooCicadaEngine {
     this.waves.length = 0;
     this.glyphs.length = 0;
     this.trail.length = 0;
+    this.motion.active = false;
+    this.motion.drive = 0;
+    this.motion.targetDrive = 0;
+    this.motion.lastEvent = 0;
     this.resetToy();
     this.lastTime = performance.now();
     this.callbacks.onStatus("playing", 0);
@@ -100,6 +106,10 @@ export class BambooCicadaEngine {
     if (this.status !== "playing") return;
     this.status = "paused";
     this.pointer.down = false;
+    this.motion.active = false;
+    this.motion.drive = 0;
+    this.motion.targetDrive = 0;
+    this.motion.lastEvent = 0;
     this.callbacks.onVoice(0, 0);
     this.callbacks.onStatus("paused", Math.round(this.score));
     this.emitHud();
@@ -116,6 +126,24 @@ export class BambooCicadaEngine {
   togglePause() {
     if (this.status === "playing") this.pause();
     else if (this.status === "paused") this.resume();
+  }
+
+  setMotionEnabled(enabled: boolean) {
+    this.motion.enabled = enabled;
+    if (enabled) return;
+    this.motion.active = false;
+    this.motion.drive = 0;
+    this.motion.targetDrive = 0;
+    this.motion.lastEvent = 0;
+    if (!this.pointer.down) this.callbacks.onVoice(0, 0);
+    this.emitHud();
+  }
+
+  setMotionSignal(signal: MotionSignal) {
+    if (!this.motion.enabled || this.status !== "playing") return;
+    this.motion.targetDrive = signal.intensity;
+    this.motion.direction = signal.direction;
+    this.motion.lastEvent = signal.timestamp;
   }
 
   destroy() {
@@ -140,6 +168,7 @@ export class BambooCicadaEngine {
 
   private update(delta: number) {
     this.remaining = Math.max(0, this.remaining - delta);
+    this.updateMotionDrive(delta);
     this.updatePhysics(delta);
     this.updateEffects(delta);
 
@@ -217,39 +246,49 @@ export class BambooCicadaEngine {
     this.stick.x += (this.target.x - this.stick.x) * follow;
     this.stick.y += (this.target.y - this.stick.y) * follow;
 
-    let accumulator = delta;
-    const step = 1 / 180;
-    const gravity = clamp(this.height * 2, 760, 1180);
-    while (accumulator > 0.00001) {
-      const part = Math.min(step, accumulator);
-      const dx = this.tube.x - this.stick.x;
-      const dy = this.tube.y - this.stick.y;
-      const distance = Math.hypot(dx, dy) || 0.0001;
-      const ux = dx / distance;
-      const uy = dy / distance;
-      let accelerationX = -this.tube.vx * 0.38;
-      let accelerationY = gravity - this.tube.vy * 0.38;
-      if (distance > this.ropeLength) {
-        const radialVelocity = this.tube.vx * ux + this.tube.vy * uy;
-        const force = -2450 * (distance - this.ropeLength) - 13 * radialVelocity;
-        accelerationX += force * ux;
-        accelerationY += force * uy;
+    if (this.motion.active && !this.pointer.down) {
+      const previousX = this.tube.x;
+      const previousY = this.tube.y;
+      const drivenRopeLength = this.ropeLength * 0.985;
+      this.tube.x = this.stick.x + Math.cos(this.motion.phase) * drivenRopeLength;
+      this.tube.y = this.stick.y + Math.sin(this.motion.phase) * drivenRopeLength;
+      this.tube.vx = (this.tube.x - previousX) / delta;
+      this.tube.vy = (this.tube.y - previousY) / delta;
+    } else {
+      let accumulator = delta;
+      const step = 1 / 180;
+      const gravity = clamp(this.height * 2, 760, 1180);
+      while (accumulator > 0.00001) {
+        const part = Math.min(step, accumulator);
+        const dx = this.tube.x - this.stick.x;
+        const dy = this.tube.y - this.stick.y;
+        const distance = Math.hypot(dx, dy) || 0.0001;
+        const ux = dx / distance;
+        const uy = dy / distance;
+        let accelerationX = -this.tube.vx * 0.38;
+        let accelerationY = gravity - this.tube.vy * 0.38;
+        if (distance > this.ropeLength) {
+          const radialVelocity = this.tube.vx * ux + this.tube.vy * uy;
+          const force = -2450 * (distance - this.ropeLength) - 13 * radialVelocity;
+          accelerationX += force * ux;
+          accelerationY += force * uy;
+        }
+        this.tube.vx += accelerationX * part;
+        this.tube.vy += accelerationY * part;
+        this.tube.x += this.tube.vx * part;
+        this.tube.y += this.tube.vy * part;
+        accumulator -= part;
       }
-      this.tube.vx += accelerationX * part;
-      this.tube.vy += accelerationY * part;
-      this.tube.x += this.tube.vx * part;
-      this.tube.y += this.tube.vy * part;
-      accumulator -= part;
-    }
 
-    const margin = 28;
-    if (this.tube.x < margin || this.tube.x > this.width - margin) {
-      this.tube.x = clamp(this.tube.x, margin, this.width - margin);
-      this.tube.vx *= -0.35;
-    }
-    if (this.tube.y < margin || this.tube.y > this.height - margin) {
-      this.tube.y = clamp(this.tube.y, margin, this.height - margin);
-      this.tube.vy *= -0.35;
+      const margin = 28;
+      if (this.tube.x < margin || this.tube.x > this.width - margin) {
+        this.tube.x = clamp(this.tube.x, margin, this.width - margin);
+        this.tube.vx *= -0.35;
+      }
+      if (this.tube.y < margin || this.tube.y > this.height - margin) {
+        this.tube.y = clamp(this.tube.y, margin, this.height - margin);
+        this.tube.vy *= -0.35;
+      }
     }
 
     this.theta = Math.atan2(this.tube.y - this.stick.y, this.tube.x - this.stick.x);
@@ -263,7 +302,7 @@ export class BambooCicadaEngine {
     const distance = Math.hypot(this.tube.x - this.stick.x, this.tube.y - this.stick.y);
     this.taut = clamp((distance / this.ropeLength - 0.87) / 0.13, 0, 1);
     const drive = clamp((this.rps - 0.6) / 2.8, 0, 1);
-    const targetVoice = allowVoice && this.pointer.down ? Math.pow(drive, 1.18) * this.taut : 0;
+    const targetVoice = allowVoice && (this.pointer.down || this.motion.active) ? Math.pow(drive, 1.18) * this.taut : 0;
     const voiceSpeed = targetVoice > this.voice ? 11 : 3.5;
     this.voice += (targetVoice - this.voice) * Math.min(1, delta * voiceSpeed);
   }
@@ -293,7 +332,7 @@ export class BambooCicadaEngine {
 
     if (!spawn) return;
     this.trailClock -= delta;
-    if (this.pointer.down && this.trailClock <= 0) {
+    if ((this.pointer.down || this.motion.active) && this.trailClock <= 0) {
       this.trailClock = 0.035;
       this.trail.unshift({ x: this.tube.x, y: this.tube.y, alpha: 0.68 });
       if (this.trail.length > 22) this.trail.length = 22;
@@ -325,6 +364,9 @@ export class BambooCicadaEngine {
   private finish(status: "won" | "lost", reason: BambooFinishReason) {
     this.status = status;
     this.pointer.down = false;
+    this.motion.active = false;
+    this.motion.drive = 0;
+    this.motion.targetDrive = 0;
     this.voice = 0;
     const result = status === "won" ? finalScore(this.score, this.remaining, this.bestCombo) : Math.max(0, Math.round(this.score));
     this.score = result;
@@ -348,6 +390,8 @@ export class BambooCicadaEngine {
       phraseProgress: this.phraseProgress,
       judgement: this.judgement,
       direction: this.rps < 0.12 ? 0 : this.omega > 0 ? 1 : -1,
+      motionActive: this.motion.active,
+      motionDrive: this.motion.drive,
     };
     this.callbacks.onHud(hud);
   }
@@ -378,6 +422,31 @@ export class BambooCicadaEngine {
     this.omega = 0;
     this.rps = 0;
     this.voice = 0;
+  }
+
+  private updateMotionDrive(delta: number) {
+    if (!this.motion.enabled || this.pointer.down) {
+      this.motion.active = false;
+      return;
+    }
+
+    const eventFresh = performance.now() - this.motion.lastEvent < 460;
+    const target = eventFresh ? this.motion.targetDrive : 0;
+    const smoothing = target > this.motion.drive ? 8.5 : 3.4;
+    this.motion.drive += (target - this.motion.drive) * Math.min(1, delta * smoothing);
+    if (!eventFresh) this.motion.targetDrive *= Math.max(0, 1 - delta * 7);
+    const wasActive = this.motion.active;
+    this.motion.active = this.motion.drive > 0.045;
+    if (!this.motion.active) return;
+    if (!wasActive) this.motion.phase = this.theta;
+
+    const revolutionsPerSecond = 0.7 + this.motion.drive * 4.4;
+    this.motion.phase += this.motion.direction * TAU * revolutionsPerSecond * delta;
+    const radius = clamp(Math.min(this.width, this.height) * (0.018 + this.motion.drive * 0.012), 7, 16);
+    const centerX = this.width * 0.5;
+    const centerY = this.height * 0.37;
+    this.target.x = centerX + Math.cos(this.motion.phase) * radius;
+    this.target.y = centerY + Math.sin(this.motion.phase) * radius;
   }
 
   private buildBackground() {
@@ -523,7 +592,7 @@ export class BambooCicadaEngine {
     });
     context.globalAlpha = 1;
 
-    if (this.status === "playing" && this.pointer.down) this.drawGuide(context);
+    if (this.status === "playing" && (this.pointer.down || this.motion.active)) this.drawGuide(context);
     this.drawRopeAndToy(context);
 
     this.glyphs.forEach((glyph) => {

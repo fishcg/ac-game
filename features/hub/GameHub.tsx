@@ -15,7 +15,7 @@ import { AssetSection } from "./components/AssetSection";
 import { SiteFooter } from "./components/SiteFooter";
 import { RankingPanel } from "./components/RankingPanel";
 
-const featuredGame = games.find((game) => game.id === "stack-up") ?? games[0];
+const featuredGame = games.find((game) => game.id === "bamboo-cicada") ?? games[0];
 const recommendedGames = [featuredGame, ...games.filter((game) => game.id !== featuredGame.id)];
 
 export function GameHub() {

@@ -27,7 +27,7 @@ import { FateChamber } from "./fate-chamber/Game";
 import { PlanetMerge } from "./planet-merge/Game";
 import { GuiyangMahjong } from "./guiyang-mahjong/Game";
 import { GameViewport } from "./GameViewport";
-import { isPortraitViewport, lockLandscapeOrientation, prefersLandscapeFullscreen, unlockOrientation } from "./mobileOrientation";
+import { isPortraitViewport, lockLandscapeOrientation, lockPortraitOrientation, prefersLandscapeFullscreen, unlockOrientation } from "./mobileOrientation";
 
 type Props = {
   game: GameInfo;
@@ -97,6 +97,22 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
     if (!next) gameAudio.play("tap");
   };
 
+  const enterFullscreen = async () => {
+    if (document.fullscreenElement === modalRef.current || fullscreen) return;
+    try {
+      await modalRef.current?.requestFullscreen();
+    } catch { /* Safari iOS 等环境使用 CSS 全屏兜底。 */ }
+
+    setFullscreen(true);
+    if (preferLandscape) {
+      await lockLandscapeOrientation();
+      setLandscapeFallback(isPortraitViewport());
+    } else {
+      await lockPortraitOrientation();
+      setLandscapeFallback(false);
+    }
+  };
+
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) {
       await document.exitFullscreen();
@@ -108,21 +124,12 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
       setFullscreen(false);
       return;
     }
-
-    try {
-      await modalRef.current?.requestFullscreen();
-    } catch { /* Safari iOS 等环境使用 CSS 全屏兜底。 */ }
-
-    setFullscreen(true);
-    if (!preferLandscape) return;
-
-    await lockLandscapeOrientation();
-    setLandscapeFallback(isPortraitViewport());
+    await enterFullscreen();
   };
 
   return (
     <div ref={modalRef} className="game-modal" role="dialog" aria-modal="true" aria-label={game.title}>
-      <div className={`game-modal__frame ${fullscreen ? "game-modal__frame--fullscreen" : ""} ${landscapeFallback ? "game-modal__frame--landscape-fallback" : ""}`}>
+      <div data-game-id={game.id} className={`game-modal__frame ${fullscreen ? "game-modal__frame--fullscreen" : ""} ${landscapeFallback ? "game-modal__frame--landscape-fallback" : ""}`}>
         <header className="game-modal__header">
           <div>
             <span className="game-modal__eyebrow">正在游玩</span>
@@ -144,7 +151,7 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
             {game.id === "planet-merge" && <PlanetMerge bestScore={bestScore} onScore={onScore} />}
             {game.id === "orbit-dash" && <OrbitDash bestScore={bestScore} onScore={onScore} />}
             {game.id === "stack-up" && <StackUp bestScore={bestScore} onScore={onScore} />}
-            {game.id === "bamboo-cicada" && <BambooCicada bestScore={bestScore} onScore={onScore} />}
+            {game.id === "bamboo-cicada" && <BambooCicada bestScore={bestScore} onScore={onScore} requestFullscreen={enterFullscreen} />}
             {game.id === "memory-pairs" && <MemoryPairs bestScore={bestScore} onScore={onScore} />}
             {game.id === "beat-rush" && <BeatRush bestScore={bestScore} onScore={onScore} />}
             {game.id === "thunder-wing" && <ThunderWing bestScore={bestScore} onScore={onScore} />}

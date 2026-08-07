@@ -45,4 +45,6 @@ export const INITIAL_HUD: BambooHud = {
   phraseProgress: 0,
   judgement: "silent",
   direction: 0,
+  motionActive: false,
+  motionDrive: 0,
 };

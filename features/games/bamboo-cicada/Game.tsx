@@ -7,8 +7,13 @@ import { BambooCicadaAudio } from "./audio";
 import { BAMBOO_ART_CREDIT } from "./assets";
 import { INITIAL_HUD, PHRASES } from "./data";
 import { BambooCicadaEngine } from "./Engine";
+import { BambooMotionInput, supportsDeviceMotion, type MotionPermissionState } from "./motion";
 import type { BambooFinishReason, BambooGameStatus, BambooHud } from "./types";
 import styles from "./Game.module.css";
+
+type BambooCicadaProps = MiniGameProps & {
+  requestFullscreen?: () => Promise<void>;
+};
 
 const JUDGEMENT_LABEL = {
   silent: "还没鸣响",
@@ -24,15 +29,17 @@ const RESULT_COPY: Record<BambooFinishReason, { title: string; detail: string }>
   "rope-broken": { title: "竹绳崩断", detail: "长时间超速会让绳子过载；出现红色警告时放慢手腕。" },
 };
 
-export function BambooCicada({ bestScore, onScore }: MiniGameProps) {
+export function BambooCicada({ bestScore, onScore, requestFullscreen }: BambooCicadaProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const engineRef = useRef<BambooCicadaEngine | null>(null);
   const audioRef = useRef<BambooCicadaAudio | null>(null);
+  const motionRef = useRef<BambooMotionInput | null>(null);
   const onScoreRef = useRef(onScore);
   const submittedRef = useRef(false);
   const [status, setStatus] = useState<BambooGameStatus>("idle");
   const [hud, setHud] = useState<BambooHud>(INITIAL_HUD);
   const [finishReason, setFinishReason] = useState<BambooFinishReason>("time-up");
+  const [motionState, setMotionState] = useState<MotionPermissionState>("checking");
 
   useEffect(() => { onScoreRef.current = onScore; }, [onScore]);
 
@@ -61,20 +68,61 @@ export function BambooCicada({ bestScore, onScore }: MiniGameProps) {
       },
       onGesture: () => audio.unlock(),
     });
+    const motion = new BambooMotionInput((signal) => engine.setMotionSignal(signal));
     engineRef.current = engine;
+    motionRef.current = motion;
+    setMotionState(supportsDeviceMotion() ? "unknown" : "unsupported");
     return () => {
+      motion.destroy();
       engine.destroy();
       audio.dispose();
       engineRef.current = null;
       audioRef.current = null;
+      motionRef.current = null;
     };
   }, []);
 
-  const start = () => {
+  const requestMobileFullscreen = () => {
+    if (typeof window === "undefined" || window.innerWidth > 900) return;
+    if (!window.matchMedia("(pointer: coarse)").matches && navigator.maxTouchPoints < 1) return;
+    void requestFullscreen?.();
+  };
+
+  const start = (fullscreen = true) => {
     submittedRef.current = false;
     audioRef.current?.unlock();
+    if (fullscreen) requestMobileFullscreen();
     gameAudio.play("start");
     engineRef.current?.start();
+  };
+
+  const enableMotion = async (startAfterPermission = false) => {
+    const input = motionRef.current;
+    if (!input || motionState === "requesting") return;
+    setMotionState("requesting");
+    audioRef.current?.unlock();
+    const permission = input.enable();
+    requestMobileFullscreen();
+    const nextState = await permission;
+    if (motionRef.current !== input) {
+      input.disable();
+      return;
+    }
+    setMotionState(nextState);
+    engineRef.current?.setMotionEnabled(nextState === "enabled");
+    gameAudio.play(nextState === "enabled" ? "great" : "miss");
+    if (startAfterPermission) start(false);
+  };
+
+  const toggleMotion = () => {
+    gameAudio.play("tap");
+    if (motionState === "enabled") {
+      motionRef.current?.disable();
+      engineRef.current?.setMotionEnabled(false);
+      setMotionState("unknown");
+      return;
+    }
+    if (motionState !== "unsupported") void enableMotion();
   };
 
   const togglePause = () => {
@@ -89,6 +137,12 @@ export function BambooCicada({ bestScore, onScore }: MiniGameProps) {
   const rpsPosition = Math.min(100, hud.rps / 5.2 * 100);
   const targetLeft = phrase.minRps / 5.2 * 100;
   const targetWidth = (phrase.maxRps - phrase.minRps) / 5.2 * 100;
+  const motionCopy = motionState === "enabled"
+    ? hud.motionActive ? "正在感应甩动力度" : "体感就绪，轻甩手机"
+    : motionState === "requesting" ? "正在请求动作权限"
+      : motionState === "denied" ? "体感权限未开启，可继续触屏游玩"
+        : motionState === "unsupported" ? "此设备不支持体感，可触屏画圆"
+          : "开启体感后可甩动手机游玩";
 
   return (
     <div className={`${styles.game} ${styles[`state-${status}`]}`}>
@@ -106,6 +160,14 @@ export function BambooCicada({ bestScore, onScore }: MiniGameProps) {
         </div>
         <div className={styles.scoreBlock}><small>得分</small><strong>{hud.score.toLocaleString()}</strong><span>最高 {displayBest.toLocaleString()}</span></div>
         <div className={styles.timer}><small>剩余</small><strong>{Math.ceil(hud.remaining)}</strong><span>秒</span></div>
+        <button
+          className={`${styles.motionButton} ${motionState === "enabled" ? styles.motionEnabled : ""}`}
+          onClick={toggleMotion}
+          disabled={motionState === "checking" || motionState === "requesting" || motionState === "unsupported"}
+          aria-label={motionState === "enabled" ? "关闭手机体感" : "开启手机体感"}
+          title={motionCopy}
+          style={{ "--motion-level": `${Math.round(hud.motionDrive * 100)}%` } as React.CSSProperties}
+        ><i>⌁</i><small>体感</small></button>
         <button className={styles.pauseButton} onClick={togglePause} disabled={status !== "playing" && status !== "paused"} aria-label={status === "paused" ? "继续游戏" : "暂停游戏"}>{status === "paused" ? "▶" : "Ⅱ"}</button>
       </header>
 
@@ -124,7 +186,9 @@ export function BambooCicada({ bestScore, onScore }: MiniGameProps) {
       </aside>
 
       <div className={styles.combo} data-active={hud.combo > 1}><span>连鸣</span><strong>×{hud.combo}</strong><small>{direction}</small></div>
-      {status === "playing" && hud.voice < 0.12 && <div className={styles.gestureHint}><i>↻</i><span>按住 · 画圆 · 让绳子绷紧</span></div>}
+      {status === "playing" && (motionState === "enabled" || motionState === "denied") && <div className={`${styles.motionStatus} ${hud.motionActive ? styles.motionStatusActive : ""} ${motionState === "denied" ? styles.motionStatusWarning : ""}`}><i /><span>{motionCopy}</span></div>}
+      {status === "playing" && hud.voice < 0.12 && <div className={styles.gestureHint}><i>↻</i><span>{motionState === "enabled" ? "握稳手机 · 轻甩起鸣" : "按住 · 画圆 · 让绳子绷紧"}</span></div>}
+      <div className={styles.portraitHint}>请将手机转回竖屏游玩</div>
       <div className={styles.bottomLore}><span>竹膜为鼓 · 松香为弦</span><i /> <span>稳住圈速，鸣声自然会来</span></div>
 
       {status === "idle" && (
@@ -132,9 +196,13 @@ export function BambooCicada({ bestScore, onScore }: MiniGameProps) {
           <div className={styles.seal}>鸣</div>
           <span className={styles.kicker}>原创互动玩具 · 夏夜鸣律</span>
           <h3>竹知了·鸣夏</h3>
-          <p>按住鼠标或手指画圆。真正的鸣叫来自圈速与绳子张力，把速度稳定在金色目标区，完成三段夏夜鸣奏。</p>
-          <div className={styles.rules}><span><b>01</b>画圆起声</span><span><b>02</b>稳住目标</span><span><b>03</b>避免超速</span></div>
-          <button onClick={start}>开始鸣夏</button>
+          <p>手机可开启体感后直接甩动，电脑也能按住鼠标或手指画圆。真正的鸣叫仍来自圈速与绳子张力，把速度稳定在金色目标区。</p>
+          <div className={styles.rules}><span><b>01</b>甩动起声</span><span><b>02</b>稳住目标</span><span><b>03</b>避免超速</span></div>
+          <div className={`${styles.overlayActions} ${styles.startActions}`}>
+            {motionState !== "unsupported" && <button onClick={() => void enableMotion(true)} disabled={motionState === "checking" || motionState === "requesting"}>{motionState === "requesting" ? "请求权限中…" : "开启体感并开始"}</button>}
+            <button onClick={() => start()}>{motionState === "unsupported" ? "开始鸣夏" : "触屏画圆开始"}</button>
+          </div>
+          <span className={`${styles.motionNote} ${motionState === "denied" || motionState === "unsupported" ? styles.motionNoteWarning : ""}`}>{motionCopy} · 手机竖屏全屏体验最佳</span>
           <small>{BAMBOO_ART_CREDIT}</small>
         </div>
       )}
@@ -142,7 +210,7 @@ export function BambooCicada({ bestScore, onScore }: MiniGameProps) {
       {status === "paused" && (
         <div className={`${styles.overlay} ${styles.pauseOverlay}`}>
           <div className={styles.seal}>歇</div><h3>竹影暂静</h3><p>计时、物理、连击和声音都已暂停。</p>
-          <div className={styles.overlayActions}><button onClick={togglePause}>继续甩动</button><button onClick={start}>重新开始</button></div>
+          <div className={styles.overlayActions}><button onClick={togglePause}>继续甩动</button><button onClick={() => start()}>重新开始</button></div>
         </div>
       )}
 
@@ -152,7 +220,7 @@ export function BambooCicada({ bestScore, onScore }: MiniGameProps) {
           <span className={styles.kicker}>{status === "won" ? "鸣奏完成" : "本局结束"}</span>
           <h3>{result.title}</h3><p>{result.detail}</p>
           <div className={styles.resultScore}><span>本局得分</span><strong>{hud.score.toLocaleString()}</strong><small>最高连鸣 ×{hud.bestCombo}</small></div>
-          <button onClick={start}>再鸣一局</button>
+          <button onClick={() => start()}>再鸣一局</button>
         </div>
       )}
     </div>

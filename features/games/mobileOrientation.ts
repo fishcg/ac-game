@@ -1,13 +1,14 @@
 import type { GameId } from "@/config/games";
 
 type LockableScreenOrientation = ScreenOrientation & {
-  lock?: (orientation: "landscape") => Promise<void>;
+  lock?: (orientation: "landscape" | "portrait") => Promise<void>;
   unlock?: () => void;
 };
 
 const PORTRAIT_FULLSCREEN_GAMES = new Set<GameId>([
   "thunder-wing",
   "planet-merge",
+  "bamboo-cicada",
 ]);
 
 export function prefersLandscapeFullscreen(gameId: GameId) {
@@ -19,11 +20,19 @@ export function isPortraitViewport() {
 }
 
 export async function lockLandscapeOrientation() {
+  return lockOrientation("landscape");
+}
+
+export async function lockPortraitOrientation() {
+  return lockOrientation("portrait");
+}
+
+async function lockOrientation(direction: "landscape" | "portrait") {
   const orientation = screen.orientation as LockableScreenOrientation | undefined;
   if (!orientation?.lock) return false;
 
   try {
-    await orientation.lock("landscape");
+    await orientation.lock(direction);
     return true;
   } catch {
     return false;

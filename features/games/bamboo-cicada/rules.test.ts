@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 // @ts-expect-error Node's built-in TypeScript test runner requires the explicit extension.
 import { advancePhraseProgress, advanceTension, completionBonus, finalScore, frameScore, judgeSpeed } from "./rules.ts";
+// @ts-expect-error Node's built-in TypeScript test runner requires the explicit extension.
+import { normalizeMotionReading } from "./motion.ts";
 
 const PHRASES = [
   { id: "first", name: "初蝉试声", subtitle: "", minRps: 1, maxRps: 2.1, holdSeconds: 4.5, accent: "#fff" },
@@ -40,4 +42,37 @@ test("只有稳定区产生持续得分，乐句和终局奖励始终为非负�
   assert.equal(completionBonus(2, 12) > completionBonus(0, 0), true);
   assert.equal(Number.isInteger(finalScore(1200.4, 12.3, 9)), true);
   assert.equal(finalScore(-100, 0, 0), 0);
+});
+
+test("体感归一化过滤静止与轻微抖动，并限制到 0–1", () => {
+  const stationary = normalizeMotionReading({
+    rotationRate: { alpha: 3, beta: -2, gamma: 1 },
+    accelerationIncludingGravity: { x: 0, y: 0, z: 9.81 },
+  });
+  assert.equal(stationary.intensity, 0);
+
+  const swing = normalizeMotionReading({
+    rotationRate: { alpha: 84, beta: 20, gamma: -12 },
+    acceleration: { x: 3.2, y: 1.4, z: 0.2 },
+  });
+  assert.equal(swing.intensity > 0, true);
+  assert.equal(swing.intensity < 1, true);
+
+  const extreme = normalizeMotionReading({
+    rotationRate: { alpha: 600, beta: 400, gamma: 200 },
+    acceleration: { x: 40, y: 20, z: 10 },
+  });
+  assert.equal(extreme.intensity, 1);
+});
+
+test("体感方向跟随最强旋转轴，无旋转率时回退到加速度方向", () => {
+  assert.equal(normalizeMotionReading({ rotationRate: { alpha: 10, beta: -120, gamma: 30 } }).direction, -1);
+  assert.equal(normalizeMotionReading({
+    rotationRate: { alpha: null, beta: null, gamma: null },
+    acceleration: { x: 1, y: 8, z: 0 },
+  }).direction, 1);
+  assert.equal(normalizeMotionReading({
+    rotationRate: { alpha: null, beta: null, gamma: null },
+    acceleration: { x: -9, y: 2, z: 0 },
+  }).direction, -1);
 });
