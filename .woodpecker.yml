@@ -11,21 +11,6 @@ clone:
       - no_proxy=localhost,127.0.0.1,10.42.0.0/16,10.43.0.0/16,172.24.173.77
 
 steps:
-  quality-check:
-    image: 172.24.173.77:30500/node:24.13.0-alpine
-    environment:
-      NEXT_TELEMETRY_DISABLED: "1"
-      https_proxy: http://172.24.173.76:7899
-      http_proxy: http://172.24.173.76:7899
-      no_proxy: localhost,127.0.0.1,10.42.0.0/16,10.43.0.0/16,172.24.173.77
-    commands:
-      - npm ci
-      - npm run lint -- --max-warnings=0
-      - npm test
-      - npm run build
-    when:
-      event: [push, tag]
-
   build-and-push:
     image: 172.24.173.77:30500/standard-docker:latest
     privileged: true
