@@ -5,6 +5,7 @@ export function GameArtwork({ type, compact = false }: { type: GameInfo["art"]; 
   return (
     <div className={`game-art game-art--${type} ${compact ? "game-art--compact" : ""}`} aria-hidden="true">
       <div className="art-grid" />
+      {type === "threeKingdoms" && <><img className="three-kingdoms-art" src="/assets/three-kingdoms-defense/lobby-card.webp" alt="" /><i className="three-kingdoms-shade" /><i className="three-kingdoms-seal">蜀</i></>}
       {type === "worm" && <><i className="worm-art-sun" /><i className="worm-art-hill wh-back" /><i className="worm-art-hill wh-front" /><i className="worm-art-crater" /><i className="worm-art-unit wu-green"><b /><b /></i><i className="worm-art-unit wu-red"><b /><b /></i><i className="worm-art-rocket" /><i className="worm-art-blast" /></>}
       {type === "prism" && <><i className="prism-art-grid" /><i className="prism-art-cube"><b /><b /></i><i className="prism-art-spike ps-a" /><i className="prism-art-spike ps-b" /><i className="prism-art-orb" /><i className="prism-art-trail" /></>}
       {type === "peg" && <><i className="peg-art-board" /><i className="peg-art-ball" /><i className="peg-art-node pn-a" /><i className="peg-art-node pn-b" /><i className="peg-art-node pn-c" /><i className="peg-art-node pn-d" /><i className="peg-art-burst">✦</i></>}

@@ -1,19 +1,31 @@
-export type GameId = "worm-front" | "prism-dash" | "rune-peg" | "fate-chamber" | "planet-merge" | "nightfall-survivors" | "iron-front" | "thunder-wing" | "orbit-dash" | "stack-up" | "bamboo-cicada" | "memory-pairs" | "beat-rush" | "hamster-roll" | "gold-miner" | "oil-tycoon" | "minesweeper" | "go" | "guiyang-mahjong" | "zuma" | "perfect-parking" | "moon-swing";
+export type GameId = "three-kingdoms-defense" | "worm-front" | "prism-dash" | "rune-peg" | "fate-chamber" | "planet-merge" | "nightfall-survivors" | "iron-front" | "thunder-wing" | "orbit-dash" | "stack-up" | "bamboo-cicada" | "memory-pairs" | "beat-rush" | "hamster-roll" | "gold-miner" | "oil-tycoon" | "minesweeper" | "go" | "guiyang-mahjong" | "zuma" | "perfect-parking" | "moon-swing";
 
 export type GameInfo = {
   id: GameId;
   title: string;
   eyebrow: string;
   description: string;
-  category: "射击" | "反应" | "益智" | "治愈" | "音乐" | "经营";
+  category: "射击" | "反应" | "益智" | "治愈" | "音乐" | "经营" | "策略";
   players: string;
   duration: string;
   accent: string;
-  art: "worm" | "prism" | "peg" | "chamber" | "planetMerge" | "nightfall" | "iron" | "thunder" | "orbit" | "stack" | "bambooCicada" | "memory" | "beat" | "hamster" | "miner" | "oil" | "minesweeper" | "go" | "mahjong" | "zuma" | "parking" | "moon";
+  art: "threeKingdoms" | "worm" | "prism" | "peg" | "chamber" | "planetMerge" | "nightfall" | "iron" | "thunder" | "orbit" | "stack" | "bambooCicada" | "memory" | "beat" | "hamster" | "miner" | "oil" | "minesweeper" | "go" | "mahjong" | "zuma" | "parking" | "moon";
   controls: string;
 };
 
 export const games: GameInfo[] = [
+  {
+    id: "three-kingdoms-defense",
+    title: "三国：烽火守城",
+    eyebrow: "武将塔防",
+    description: "在黄巾围村的六轮攻势中建造三类兵营、选择专精军令，调动关羽并用火攻击败张梁。",
+    category: "策略",
+    players: "NEW",
+    duration: "6–8 分钟",
+    accent: "#d19d43",
+    art: "threeKingdoms",
+    controls: "点击营地建造、升级或选择分支；点击绿色军旗调动关羽；积攒士气发动火攻，Q 释放武将大招，P 暂停",
+  },
   {
     id: "worm-front",
     title: "荒丘虫兵",

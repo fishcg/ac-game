@@ -8,18 +8,23 @@
     "prepare:standalone": "rm -rf .next/standalone/public .next/standalone/.next/static && cp -R public .next/standalone/public && cp -R .next/static .next/standalone/.next/static",
     "start": "npm run prepare:standalone && PORT=4399 HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "lint": "eslint .",
-    "test": "node --test features/games/guiyang-mahjong/rules.test.ts features/games/bamboo-cicada/rules.test.ts features/games/planet-merge/rules.test.ts features/games/go/goAi.test.ts",
+    "test": "node --test features/games/guiyang-mahjong/rules.test.ts features/games/bamboo-cicada/rules.test.ts features/games/planet-merge/rules.test.ts features/games/three-kingdoms-defense/rules.test.ts features/games/go/goAi.test.ts features/games/go/goNeuralAi.test.ts",
     "generate:nightfall-bgm": "node scripts/audio/generate-nightfall-bgm.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.4.0",
+    "@tensorflow/tfjs": "4.22.0",
+    "@tensorflow/tfjs-backend-wasm": "4.22.0",
+    "@tensorflow/tfjs-backend-webgpu": "4.22.0",
     "next": "16.2.11",
+    "pako": "2.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "three": "^0.180.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "@types/pako": "2.0.3",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/three": "^0.180.0",

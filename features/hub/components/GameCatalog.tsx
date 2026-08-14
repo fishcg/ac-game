@@ -2,7 +2,7 @@ import type { GameInfo, GameId } from "@/config/games";
 import { GameArtwork } from "@/components/ui/GameArtwork";
 import { PlayIcon, TrophyIcon } from "@/components/ui/Icons";
 
-export const categories = ["全部", "射击", "反应", "益智", "治愈", "音乐", "经营"] as const;
+export const categories = ["全部", "射击", "反应", "益智", "治愈", "音乐", "经营", "策略"] as const;
 export type Category = (typeof categories)[number];
 
 type Props = { games: GameInfo[]; category: Category; onCategory: (value: Category) => void; onPlay: (game: GameInfo) => void; getBest: (id: GameId) => number };

@@ -26,6 +26,7 @@ import { RunePeg } from "./rune-peg/Game";
 import { FateChamber } from "./fate-chamber/Game";
 import { PlanetMerge } from "./planet-merge/Game";
 import { GuiyangMahjong } from "./guiyang-mahjong/Game";
+import { ThreeKingdomsDefense } from "./three-kingdoms-defense/Game";
 import { GameViewport } from "./GameViewport";
 import { isPortraitViewport, lockLandscapeOrientation, lockPortraitOrientation, preferredMobileOrientation, prefersLandscapeFullscreen, unlockOrientation } from "./mobileOrientation";
 
@@ -167,6 +168,7 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
             {game.id === "zuma" && <ZumaGame bestScore={bestScore} onScore={onScore} />}
             {game.id === "perfect-parking" && <PerfectParking bestScore={bestScore} onScore={onScore} />}
             {game.id === "moon-swing" && <MoonSwing bestScore={bestScore} onScore={onScore} />}
+            {game.id === "three-kingdoms-defense" && <ThreeKingdomsDefense bestScore={bestScore} onScore={onScore} />}
           </GameViewport>
         </div>
         <footer className="game-modal__footer">

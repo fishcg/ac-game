@@ -1,5 +1,5 @@
 // @ts-expect-error Node 的内置 TypeScript 测试运行器需要显式扩展名。
-import { boardHash, groupAt, neighbors, otherColor, playMove } from "./goRules.ts";
+import { boardHash, groupAt, neighbors, otherColor, playMove, scoreBoard } from "./goRules.ts";
 import type { BoardSize, PlayerStone, Stone } from "./types";
 
 export type AiSearchOptions = {
@@ -73,6 +73,57 @@ function isLikelyOwnEye(board: Stone[], index: number, color: PlayerStone, size:
   return friendlyCorners >= Math.max(1, existingCorners - 1);
 }
 
+type LifeProfile = {
+  eyes: number;
+  eyeSpace: number;
+  liberties: number;
+  alive: boolean;
+};
+
+function lifeProfile(board: Stone[], group: ReturnType<typeof groupAt>, color: PlayerStone, size: BoardSize): LifeProfile {
+  const checked = new Set<number>();
+  const maximumEyeSpace = size === 9 ? 9 : 14;
+  if (group.liberties.size > maximumEyeSpace * 2) {
+    return { eyes: 0, eyeSpace: 0, liberties: group.liberties.size, alive: false };
+  }
+  let eyes = 0;
+  let eyeSpace = 0;
+
+  for (const liberty of group.liberties) {
+    if (checked.has(liberty)) continue;
+    const region = new Set<number>();
+    const borderColors = new Set<PlayerStone>();
+    const borderStones = new Set<number>();
+    const queue = [liberty];
+    let overflow = false;
+
+    while (queue.length) {
+      const point = queue.pop();
+      if (point === undefined || region.has(point) || board[point] !== 0) continue;
+      region.add(point);
+      checked.add(point);
+      if (region.size > maximumEyeSpace) { overflow = true; break; }
+      for (const neighbor of neighbors(point, size)) {
+        const stone = board[neighbor];
+        if (stone === 0 && !region.has(neighbor)) queue.push(neighbor);
+        else if (stone !== 0) {
+          borderColors.add(stone as PlayerStone);
+          borderStones.add(neighbor);
+        }
+      }
+    }
+
+    if (overflow || borderColors.size !== 1 || !borderColors.has(color)) continue;
+    const touchesGroup = [...borderStones].some((stone) => group.stones.has(stone));
+    if (!touchesGroup || borderStones.size < 2) continue;
+    if (region.size === 1 && !isLikelyOwnEye(board, liberty, color, size)) continue;
+    eyes += 1;
+    eyeSpace += region.size;
+  }
+
+  return { eyes, eyeSpace, liberties: group.liberties.size, alive: eyes >= 2 };
+}
+
 function candidateIndexes(board: Stone[], size: BoardSize, moveNumber: number) {
   const occupied: number[] = [];
   const tactical = new Set<number>();
@@ -140,11 +191,30 @@ function movePrior(board: Stone[], result: Stone[], index: number, color: Player
     else if (group.liberties.size === 2 && group.liberties.has(index)) score += 5 + group.stones.size * 2.4;
   }
 
+  const beforeProfiles = [...adjacentOwnGroups.values()].map((group) => lifeProfile(board, group, color, size));
+  const afterProfile = lifeProfile(result, ownGroup, color, size);
+  const previousEyes = beforeProfiles.reduce((best, profile) => Math.max(best, profile.eyes), 0);
+  const previousEyeSpace = beforeProfiles.reduce((best, profile) => Math.max(best, profile.eyeSpace), 0);
+  const previousLiberties = beforeProfiles.reduce((best, profile) => Math.max(best, profile.liberties), 0);
+  const previouslyAlive = beforeProfiles.some((profile) => profile.alive);
+
+  if (!previouslyAlive && afterProfile.alive) score += 150 + ownGroup.stones.size * 2;
+  if (previouslyAlive && !afterProfile.alive) score -= 240 + ownGroup.stones.size * 4;
+  score += (afterProfile.eyes - previousEyes) * 42;
+  if (afterProfile.eyeSpace < previousEyeSpace && afterProfile.eyes <= previousEyes) {
+    score -= (previousEyeSpace - afterProfile.eyeSpace) * 18;
+  }
+
   score += Math.min(5, ownGroup.liberties.size) * 2.8;
-  if (ownGroup.liberties.size === 1 && captured === 0) score -= 58 + ownGroup.stones.size * 7;
+  if (ownGroup.liberties.size === 1 && captured === 0) score -= 180 + ownGroup.stones.size * 10;
   if (ownGroup.liberties.size === 2) score -= 5;
+  if (captured === 0 && previousLiberties > 0 && ownGroup.liberties.size < previousLiberties) {
+    score -= (previousLiberties - ownGroup.liberties.size) * (20 + Math.sqrt(ownGroup.stones.size) * 4);
+  } else if (ownGroup.liberties.size > previousLiberties) {
+    score += Math.min(4, ownGroup.liberties.size - previousLiberties) * 7;
+  }
   if (adjacentOwnGroups.size >= 2) score += adjacentOwnGroups.size * 5;
-  if (isLikelyOwnEye(board, index, color, size) && captured === 0) score -= 80;
+  if (isLikelyOwnEye(board, index, color, size) && captured === 0) score -= 260;
 
   const resultingEnemySeen = new Set<number>();
   for (const neighbor of adjacent) {
@@ -182,6 +252,7 @@ function generateCandidates(board: Stone[], color: PlayerStone, size: BoardSize,
   for (const index of candidateIndexes(board, size, moveNumber)) {
     const move = playMove(board, index, color, size, hashes);
     if (!move.legal) continue;
+    if (move.captured === 0 && isLikelyOwnEye(board, index, color, size)) continue;
     let prior = movePrior(board, move.board, index, color, size, move.captured, moveNumber);
     const ownDanger = immediateDanger(move.board, color, size);
     prior -= ownDanger * .85;
@@ -222,12 +293,20 @@ function evaluateBoard(board: Stone[], rootColor: PlayerStone, size: BoardSize) 
 
   const groupValue = (color: PlayerStone) => collectGroups(board, size, color).reduce((sum, group) => {
     const liberties = group.liberties.size;
+    const profile = lifeProfile(board, group, color, size);
     const safety = Math.min(5, liberties) * Math.sqrt(group.stones.size);
     const atariPenalty = liberties === 1 ? group.stones.size * 7 : liberties === 2 ? group.stones.size * 1.2 : 0;
-    return sum + safety - atariPenalty;
+    const lifeValue = profile.alive
+      ? 34 + group.stones.size * 1.6 + profile.eyeSpace * 2
+      : profile.eyes * 11 + profile.eyeSpace * 1.4;
+    return sum + safety + lifeValue - atariPenalty;
   }, 0);
+  const occupiedRatio = (rootStones + opponentStones) / board.length;
   const komi = rootColor === 2 ? (size === 9 ? 5.5 : 7.5) : -(size === 9 ? 5.5 : 7.5);
-  const raw = (rootStones - opponentStones) * 4.2 + influence * .85 + (groupValue(rootColor) - groupValue(opponent)) * 1.35 + komi;
+  const score = scoreBoard(board, size);
+  const areaDifference = rootColor === 1 ? score.black - score.white : score.white - score.black;
+  const areaValue = occupiedRatio >= .34 && rootStones > 0 && opponentStones > 0 ? areaDifference * .65 : komi;
+  const raw = (rootStones - opponentStones) * 1.15 + influence * .85 + (groupValue(rootColor) - groupValue(opponent)) * 1.45 + areaValue;
   return Math.tanh(raw / (size === 9 ? 22 : 48));
 }
 

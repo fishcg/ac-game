@@ -7,6 +7,7 @@ import { boardHash, playMove } from "./goRules.ts";
 import type { Stone } from "./types.ts";
 
 const search = { maxTimeMs: 10_000, maxSimulations: 260, seed: 7 };
+const oneStepSearch = { maxTimeMs: 1_000, maxSimulations: 1, seed: 7 };
 
 test("空棋盘优先选择有全局价值的开局点", () => {
   const board = Array(81).fill(0) as Stone[];
@@ -40,6 +41,32 @@ test("电脑会挽救被叫吃的多子棋块", () => {
   const escape = 4 * 9 + 6;
   const move = chooseAiMove(board, 2, 9, [boardHash(board)], 18, search);
   assert.equal(move, escape);
+});
+
+test("电脑不会填掉自己的真眼", () => {
+  const board = Array(81).fill(0) as Stone[];
+  for (const [row, col] of [[3, 3], [3, 4], [3, 5], [4, 3], [4, 5], [5, 3], [5, 4], [5, 5]]) {
+    board[row * 9 + col] = 1;
+  }
+  board[1 * 9 + 1] = 2;
+  const eye = 4 * 9 + 4;
+  const move = chooseAiMove(board, 1, 9, [boardHash(board)], 28, oneStepSearch);
+  assert.notEqual(move, eye);
+});
+
+test("电脑会分隔眼位做出两眼活棋", () => {
+  const board = Array(81).fill(0) as Stone[];
+  for (let col = 2; col <= 6; col += 1) {
+    board[3 * 9 + col] = 1;
+    board[5 * 9 + col] = 1;
+  }
+  board[4 * 9 + 2] = 1;
+  board[4 * 9 + 6] = 1;
+  board[1 * 9 + 1] = 2;
+  board[1 * 9 + 2] = 2;
+  const vitalPoint = 4 * 9 + 4;
+  const move = chooseAiMove(board, 1, 9, [boardHash(board)], 30, oneStepSearch);
+  assert.equal(move, vitalPoint);
 });
 
 test("搜索返回的落子始终通过正式劫争和禁入点规则", () => {

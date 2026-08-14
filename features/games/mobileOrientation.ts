@@ -16,6 +16,7 @@ const PORTRAIT_FULLSCREEN_GAMES = new Set<GameId>([
   "hamster-roll",
   "minesweeper",
   "go",
+  "three-kingdoms-defense",
 ]);
 
 export function preferredMobileOrientation(gameId: GameId): "portrait" | "landscape" {
