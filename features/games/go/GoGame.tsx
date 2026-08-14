@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { gameAudio } from "@/lib/audio/gameAudio";
 import type { MiniGameProps } from "../types";
-import { chooseAiMove } from "./goAi";
 import { LifeDeathMode } from "./LifeDeathMode";
 import { boardHash, otherColor, playMove, scoreBoard, starPoints } from "./goRules";
 import type { BoardSize, Captures, MatchResult, PlayerStone, Stone } from "./types";
@@ -30,9 +29,14 @@ export function GoGame({ bestScore, onScore }: MiniGameProps) {
   const [message, setMessage] = useState("黑棋先行");
   const [result, setResult] = useState<MatchResult | null>(null);
   const aiTimer = useRef<number | null>(null);
+  const aiWorker = useRef<Worker | null>(null);
+  const aiRequestId = useRef(0);
   const stars = useMemo(() => starPoints(size), [size]);
   const aiColor = otherColor(playerColor);
-  useEffect(() => () => { if (aiTimer.current !== null) window.clearTimeout(aiTimer.current); }, []);
+  useEffect(() => () => {
+    if (aiTimer.current !== null) window.clearTimeout(aiTimer.current);
+    aiWorker.current?.terminate();
+  }, []);
 
   if (mode === "life-death") return <LifeDeathMode bestScore={bestScore} onScore={onScore} onBack={() => setMode("match")} />;
 
@@ -51,45 +55,73 @@ export function GoGame({ bestScore, onScore }: MiniGameProps) {
   const scheduleAi = (currentBoard: Stone[], hashes: string[], currentPasses: number, currentCaptures: Captures, currentMove: number, currentSize: BoardSize, currentPlayerColor: PlayerStone) => {
     const computerColor = otherColor(currentPlayerColor);
     setThinking(true);
-    setMessage("对手正在思考…");
+    setMessage(currentSize === 9 ? "电脑正在推演攻防…" : "电脑正在搜索全局棋形…");
     aiTimer.current = window.setTimeout(() => {
-      const index = chooseAiMove(currentBoard, computerColor, currentSize, hashes, currentMove);
-      if (index === null) {
-        const nextPasses = currentPasses + 1;
-        setPasses(nextPasses);
-        setLastMove(null);
+      aiWorker.current?.terminate();
+      const worker = new Worker(new URL("./goAi.worker.ts", import.meta.url), { type: "module" });
+      aiWorker.current = worker;
+      const requestId = ++aiRequestId.current;
+      const finishAiMove = (index: number | null) => {
+        if (requestId !== aiRequestId.current) return;
+        aiWorker.current?.terminate();
+        aiWorker.current = null;
+        if (index === null) {
+          const nextPasses = currentPasses + 1;
+          setPasses(nextPasses);
+          setLastMove(null);
+          setMoveNumber(currentMove + 1);
+          if (nextPasses >= 2) { finishByScore(currentBoard); return; }
+          setTurn(currentPlayerColor);
+          setThinking(false);
+          setMessage("对手停一手，轮到你");
+          return;
+        }
+        const move = playMove(currentBoard, index, computerColor, currentSize, hashes);
+        if (!move.legal) {
+          setTurn(currentPlayerColor);
+          setThinking(false);
+          setMessage("轮到你落子");
+          return;
+        }
+        const nextCaptures = { ...currentCaptures };
+        if (computerColor === 1) nextCaptures.black += move.captured;
+        else nextCaptures.white += move.captured;
+        setBoard(move.board);
+        setHistory([...hashes, boardHash(move.board)]);
+        setCaptures(nextCaptures);
+        setPasses(0);
         setMoveNumber(currentMove + 1);
-        if (nextPasses >= 2) { finishByScore(currentBoard); return; }
+        setLastMove(index);
         setTurn(currentPlayerColor);
         setThinking(false);
-        setMessage("对手停一手，轮到你");
-        return;
-      }
-      const move = playMove(currentBoard, index, computerColor, currentSize, hashes);
-      if (!move.legal) {
-        setTurn(currentPlayerColor);
+        setMessage(move.captured ? `对手提走 ${move.captured} 子，轮到你` : "轮到你落子");
+        gameAudio.play(move.captured ? "score" : "tap");
+      };
+      worker.onmessage = (event: MessageEvent<{ id: number; index: number | null }>) => {
+        if (event.data.id === requestId) finishAiMove(event.data.index);
+      };
+      worker.onerror = () => {
+        if (requestId !== aiRequestId.current) return;
+        worker.terminate();
+        aiWorker.current = null;
         setThinking(false);
-        setMessage("轮到你落子");
-        return;
-      }
-      const nextCaptures = { ...currentCaptures };
-      if (computerColor === 1) nextCaptures.black += move.captured;
-      else nextCaptures.white += move.captured;
-      setBoard(move.board);
-      setHistory([...hashes, boardHash(move.board)]);
-      setCaptures(nextCaptures);
-      setPasses(0);
-      setMoveNumber(currentMove + 1);
-      setLastMove(index);
-      setTurn(currentPlayerColor);
-      setThinking(false);
-      setMessage(move.captured ? `对手提走 ${move.captured} 子，轮到你` : "轮到你落子");
-      gameAudio.play(move.captured ? "score" : "tap");
-    }, 580);
+        setTurn(currentPlayerColor);
+        setMessage("电脑思考中断，已轮到你");
+      };
+      worker.postMessage({ id: requestId, board: currentBoard, color: computerColor, size: currentSize, hashes, moveNumber: currentMove });
+    }, 360);
+  };
+
+  const cancelAi = () => {
+    aiRequestId.current += 1;
+    if (aiTimer.current !== null) window.clearTimeout(aiTimer.current);
+    aiTimer.current = null;
+    aiWorker.current?.terminate();
+    aiWorker.current = null;
   };
 
   const start = () => {
-    if (aiTimer.current !== null) window.clearTimeout(aiTimer.current);
+    cancelAi();
     const nextBoard = Array(setupSize * setupSize).fill(0) as Stone[];
     const hashes = [boardHash(nextBoard)];
     setSize(setupSize);
@@ -148,16 +180,13 @@ export function GoGame({ bestScore, onScore }: MiniGameProps) {
 
   const judgeResult = () => {
     if (status !== "playing") return;
-    if (aiTimer.current !== null) {
-      window.clearTimeout(aiTimer.current);
-      aiTimer.current = null;
-    }
+    cancelAi();
     finishByScore(board);
   };
 
   const resign = () => {
     if (status !== "playing" || thinking) return;
-    if (aiTimer.current !== null) window.clearTimeout(aiTimer.current);
+    cancelAi();
     const score = scoreBoard(board, size);
     setResult({ ...score, winner: aiColor, reason: "resign" });
     setStatus("finished");
@@ -166,7 +195,7 @@ export function GoGame({ bestScore, onScore }: MiniGameProps) {
   };
 
   const openSetup = () => {
-    if (aiTimer.current !== null) window.clearTimeout(aiTimer.current);
+    cancelAi();
     setThinking(false);
     setStatus("intro");
   };
@@ -200,7 +229,7 @@ export function GoGame({ bestScore, onScore }: MiniGameProps) {
         </aside>
       </main>
 
-      {status === "intro" && <div className={styles.overlay}><div className={styles.introPanel}><span className={styles.seal}>弈</span><h3>围棋</h3><p>一边与本地 AI 对弈，一边挑战 50 道公开 SGF 标准死活题，练习眼形、攻杀和复杂劫活。</p><div className={styles.modeChoices}><button className={styles.selected} onClick={() => setMode("match")}><strong>人机对战</strong><small>9 路 / 19 路 · 实战计分</small></button><button onClick={() => setMode("life-death")}><strong>死活棋 50 关</strong><small>入门到高级 · 标准变化图</small></button></div><label>选择棋盘</label><div className={styles.choices}><button className={setupSize === 9 ? styles.selected : ""} onClick={() => setSetupSize(9)}><strong>9 路</strong><small>9×9 · 快速对局</small></button><button className={setupSize === 19 ? styles.selected : ""} onClick={() => setSetupSize(19)}><strong>标准 19 路</strong><small>19×19 · 完整棋局</small></button></div><label>选择执子</label><div className={styles.colors}><button className={setupColor === 1 ? styles.selected : ""} onClick={() => setSetupColor(1)}><i className={`${styles.sample} ${styles.black}`} />执黑先行</button><button className={setupColor === 2 ? styles.selected : ""} onClick={() => setSetupColor(2)}><i className={`${styles.sample} ${styles.white}`} />执白后手</button></div><button className={styles.start} onClick={start}>开始对弈</button></div></div>}
+      {status === "intro" && <div className={styles.overlay}><div className={styles.introPanel}><span className={styles.seal}>弈</span><h3>围棋</h3><p>使用 UCT 蒙特卡洛树搜索的本地 AI 会推演双方后续攻防，并结合提子、救棋、气和全局棋形判断；另有 50 道公开 SGF 标准死活题。</p><div className={styles.modeChoices}><button className={styles.selected} onClick={() => setMode("match")}><strong>人机对战</strong><small>搜索型 AI · 9 路 / 19 路</small></button><button onClick={() => setMode("life-death")}><strong>死活棋 50 关</strong><small>入门到高级 · 标准变化图</small></button></div><label>选择棋盘</label><div className={styles.choices}><button className={setupSize === 9 ? styles.selected : ""} onClick={() => setSetupSize(9)}><strong>9 路</strong><small>更深搜索 · 快速对局</small></button><button className={setupSize === 19 ? styles.selected : ""} onClick={() => setSetupSize(19)}><strong>标准 19 路</strong><small>全局棋形 · 完整棋局</small></button></div><label>选择执子</label><div className={styles.colors}><button className={setupColor === 1 ? styles.selected : ""} onClick={() => setSetupColor(1)}><i className={`${styles.sample} ${styles.black}`} />执黑先行</button><button className={setupColor === 2 ? styles.selected : ""} onClick={() => setSetupColor(2)}><i className={`${styles.sample} ${styles.white}`} />执白后手</button></div><button className={styles.start} onClick={start}>开始对弈</button></div></div>}
 
       {status === "finished" && result && <div className={styles.overlay}><div className={styles.resultPanel}><span className={styles.seal}>{result.winner === playerColor ? "胜" : "负"}</span><h3>{result.reason === "resign" ? "你已认输" : result.winner === playerColor ? "对局胜利" : "电脑获胜"}</h3>{result.reason === "score" ? <><p>黑棋 {result.black.toFixed(1)} 目 · 白棋 {result.white.toFixed(1)} 目</p><div className={styles.scoreDetails}><span>黑方领地 {result.blackTerritory}</span><span>白方领地 {result.whiteTerritory}</span><span>白棋贴目 {result.komi}</span></div></> : <p>{colorName(result.winner)}中盘胜</p>}<div className={styles.resultActions}><button onClick={start}>再来一局</button><button onClick={openSetup}>更换棋盘</button></div></div></div>}
     </div>
