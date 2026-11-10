@@ -18,6 +18,7 @@ const FIXED_VIEWPORTS: Partial<Record<GameId, ViewportSpec>> = {
   zuma: LANDSCAPE_16_9,
   "perfect-parking": LANDSCAPE_16_9,
   "moon-swing": LANDSCAPE_16_9,
+  "shadow-ninja": LANDSCAPE_16_9,
   "bamboo-cicada": { width: 9, height: 16 },
   "three-kingdoms-defense": { width: 9, height: 16 },
 };

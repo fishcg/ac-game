@@ -1,4 +1,4 @@
-export type GameId = "three-kingdoms-defense" | "worm-front" | "prism-dash" | "rune-peg" | "fate-chamber" | "planet-merge" | "nightfall-survivors" | "iron-front" | "thunder-wing" | "orbit-dash" | "stack-up" | "bamboo-cicada" | "memory-pairs" | "beat-rush" | "hamster-roll" | "gold-miner" | "oil-tycoon" | "minesweeper" | "go" | "guiyang-mahjong" | "zuma" | "perfect-parking" | "moon-swing";
+export type GameId = "three-kingdoms-defense" | "worm-front" | "prism-dash" | "rune-peg" | "fate-chamber" | "planet-merge" | "nightfall-survivors" | "iron-front" | "thunder-wing" | "orbit-dash" | "stack-up" | "bamboo-cicada" | "memory-pairs" | "beat-rush" | "hamster-roll" | "gold-miner" | "oil-tycoon" | "minesweeper" | "go" | "guiyang-mahjong" | "zuma" | "perfect-parking" | "moon-swing" | "shadow-ninja" | "gou-er-3a";
 
 export type GameInfo = {
   id: GameId;
@@ -9,7 +9,7 @@ export type GameInfo = {
   players: string;
   duration: string;
   accent: string;
-  art: "threeKingdoms" | "worm" | "prism" | "peg" | "chamber" | "planetMerge" | "nightfall" | "iron" | "thunder" | "orbit" | "stack" | "bambooCicada" | "memory" | "beat" | "hamster" | "miner" | "oil" | "minesweeper" | "go" | "mahjong" | "zuma" | "parking" | "moon";
+  art: "threeKingdoms" | "worm" | "prism" | "peg" | "chamber" | "planetMerge" | "nightfall" | "iron" | "thunder" | "orbit" | "stack" | "bambooCicada" | "memory" | "beat" | "hamster" | "miner" | "oil" | "minesweeper" | "go" | "mahjong" | "zuma" | "parking" | "moon" | "shadowNinja" | "gouEr";
   controls: string;
 };
 
@@ -25,6 +25,18 @@ export const games: GameInfo[] = [
     accent: "#d19d43",
     art: "threeKingdoms",
     controls: "点击营地建造、升级或选择分支；点击绿色军旗调动关羽；积攒士气发动火攻，Q 释放武将大招，P 暂停",
+  },
+  {
+    id: "gou-er-3a",
+    title: "狗耳3A大作",
+    eyebrow: "雨夜港区 · 3D 突击",
+    description: "第一人称潜入狗耳港区，切断三处上行中继、击退机械守卫，再从码头南端登船撤离。",
+    category: "射击",
+    players: "NEW",
+    duration: "8–20 分钟",
+    accent: "#d9a35c",
+    art: "gouEr",
+    controls: "WASD 移动，鼠标视角，左键开火、右键瞄准，R 换弹，按住 E 切断中继，Space 跳跃，Shift 冲刺，C 蹲伏，Esc 暂停；支持触屏与手柄",
   },
   {
     id: "worm-front",
@@ -198,5 +210,11 @@ export const games: GameInfo[] = [
     id: "moon-swing", title: "月亮荡秋千", eyebrow: "星空飞荡",
     description: "释放绳索并抓住下一颗星球，借惯性收集星尘，一路荡向遥远的月宫。", category: "治愈", players: "NEW", duration: "1–3 分钟", accent: "#8bcfea", art: "moon",
     controls: "点击或空格释放绳索，目标发光时再次点击抓住星球，P 暂停",
+  },
+  {
+    id: "shadow-ninja", title: "影忍对决", eyebrow: "横版格斗 · 三忍可选",
+    description: "三名原创忍者各带三套忍术与奥义，在竹林月夜里用轻攻、重攻、防御与查克拉展开三局两胜对决。",
+    category: "反应", players: "1–2", duration: "3–6 分钟", accent: "#6fc8ff", art: "shadowNinja",
+    controls: "单人用 WASD 移动、J 轻攻、K 重攻、L 防御、I 忍术、U 奥义；双人 P2 用方向键与 1–5；Esc 暂停，Enter 再战；支持触屏",
   },
 ];

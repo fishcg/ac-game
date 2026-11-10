@@ -28,6 +28,8 @@ export function GameArtwork({ type, compact = false }: { type: GameInfo["art"]; 
       {type === "zuma" && <><i className="zuma-art-track" /><i className="zuma-art-ball za-1" /><i className="zuma-art-ball za-2" /><i className="zuma-art-ball za-3" /><i className="zuma-art-ball za-4" /><i className="zuma-art-ball za-5" /><i className="zuma-art-idol">☀</i></>}
       {type === "parking" && <><i className="parking-art-sun" /><i className="parking-art-city" /><i className="parking-art-road" /><i className="parking-art-bay">P</i><i className="parking-art-car"><b /><b /></i></>}
       {type === "moon" && <><i className="moon-art-stars" /><i className="moon-art-planet mp-a" /><i className="moon-art-planet mp-b" /><i className="moon-art-rope" /><i className="moon-art-rabbit">☻</i><i className="moon-art-spark">✦</i></>}
+      {type === "shadowNinja" && <><i className="ninja-art-moon" /><i className="ninja-art-fog nf-a" /><i className="ninja-art-fog nf-b" /><i className="ninja-art-bamboo nb-a" /><i className="ninja-art-bamboo nb-b" /><i className="ninja-art-slash" /><i className="ninja-art-fighter nj-left" /><i className="ninja-art-fighter nj-right" /><i className="ninja-art-seal">影</i></>}
+      {type === "gouEr" && <><i className="gouer-art-moon" /><i className="gouer-art-beam" /><i className="gouer-art-fog gf-a" /><i className="gouer-art-fog gf-b" /><i className="gouer-art-crane gc-a"><b /></i><i className="gouer-art-crane gc-b"><b /></i><i className="gouer-art-container gx-a" /><i className="gouer-art-container gx-b" /><i className="gouer-art-container gx-c" /><i className="gouer-art-soldier" /><i className="gouer-art-rifle" /><span className="gouer-art-code">GOU-ER PORT · B4-0271</span><i className="gouer-art-seal">狗耳</i></>}
     </div>
   );
 }

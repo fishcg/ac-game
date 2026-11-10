@@ -20,6 +20,8 @@ import { GoGame } from "./go/GoGame";
 import { ZumaGame } from "./zuma/ZumaGame";
 import { PerfectParking } from "./perfect-parking/PerfectParking";
 import { MoonSwing } from "./moon-swing/MoonSwing";
+import { ShadowNinja } from "./shadow-ninja/Game";
+import { GouEr3a } from "./gou-er-3a/Game";
 import { WormFront } from "./worm-front/WormFront";
 import { PrismDash } from "./prism-dash/Game";
 import { RunePeg } from "./rune-peg/Game";
@@ -169,6 +171,8 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
             {game.id === "perfect-parking" && <PerfectParking bestScore={bestScore} onScore={onScore} />}
             {game.id === "moon-swing" && <MoonSwing bestScore={bestScore} onScore={onScore} />}
             {game.id === "three-kingdoms-defense" && <ThreeKingdomsDefense bestScore={bestScore} onScore={onScore} />}
+            {game.id === "gou-er-3a" && <GouEr3a bestScore={bestScore} onScore={onScore} />}
+            {game.id === "shadow-ninja" && <ShadowNinja bestScore={bestScore} onScore={onScore} />}
           </GameViewport>
         </div>
         <footer className="game-modal__footer">

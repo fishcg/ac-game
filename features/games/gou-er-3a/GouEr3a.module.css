@@ -1,0 +1,128 @@
+.stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #04080b;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #04080b;
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(120% 80% at 50% 42%, #0c1d24 0%, #050c10 62%, #03070a 100%);
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+.loading[data-hidden="true"] {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.loadingInner {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  color: #cdb68d;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 5px;
+  border: 1px solid #70583a66;
+  border-top-color: #e0b46a;
+  border-radius: 50%;
+  animation: gouer-spin 1.05s linear infinite;
+}
+
+.loadingText {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+}
+
+.loadingSub {
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: #8a7a5f;
+}
+
+.score {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 4;
+  min-width: 186px;
+  padding: 10px 14px 11px;
+  border: 1px solid #d9a35c4d;
+  border-left: 3px solid #d9a35c;
+  background: linear-gradient(135deg, #071014f0, #071014c4);
+  box-shadow: 0 14px 34px #00000059;
+  color: #ecdfc4;
+  pointer-events: none;
+}
+
+.scoreLabel {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: #9c8b6b;
+}
+
+.scoreValue {
+  display: block;
+  margin-top: 3px;
+  font-family: Georgia, "Songti SC", serif;
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1;
+  color: #ffd89a;
+  font-variant-numeric: tabular-nums;
+}
+
+.scoreBest {
+  display: block;
+  margin-top: 7px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #a99a7e;
+}
+
+@media (max-width: 640px) {
+  .score {
+    bottom: 8px;
+    left: 8px;
+    min-width: 156px;
+    padding: 8px 10px 9px;
+  }
+
+  .scoreValue {
+    font-size: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+
+@keyframes gouer-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
