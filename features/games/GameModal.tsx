@@ -22,6 +22,7 @@ import { PerfectParking } from "./perfect-parking/PerfectParking";
 import { MoonSwing } from "./moon-swing/MoonSwing";
 import { ShadowNinja } from "./shadow-ninja/Game";
 import { GouEr3a } from "./gou-er-3a/Game";
+import { WukongTigerEngine } from "./wukong-tiger-engine/Game";
 import { WormFront } from "./worm-front/WormFront";
 import { PrismDash } from "./prism-dash/Game";
 import { RunePeg } from "./rune-peg/Game";
@@ -172,6 +173,7 @@ export function GameModal({ game, bestScore, onClose, onScore }: Props) {
             {game.id === "moon-swing" && <MoonSwing bestScore={bestScore} onScore={onScore} />}
             {game.id === "three-kingdoms-defense" && <ThreeKingdomsDefense bestScore={bestScore} onScore={onScore} />}
             {game.id === "gou-er-3a" && <GouEr3a bestScore={bestScore} onScore={onScore} />}
+            {game.id === "wukong-tiger-engine" && <WukongTigerEngine bestScore={bestScore} onScore={onScore} />}
             {game.id === "shadow-ninja" && <ShadowNinja bestScore={bestScore} onScore={onScore} />}
           </GameViewport>
         </div>

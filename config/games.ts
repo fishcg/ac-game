@@ -1,15 +1,15 @@
-export type GameId = "three-kingdoms-defense" | "worm-front" | "prism-dash" | "rune-peg" | "fate-chamber" | "planet-merge" | "nightfall-survivors" | "iron-front" | "thunder-wing" | "orbit-dash" | "stack-up" | "bamboo-cicada" | "memory-pairs" | "beat-rush" | "hamster-roll" | "gold-miner" | "oil-tycoon" | "minesweeper" | "go" | "guiyang-mahjong" | "zuma" | "perfect-parking" | "moon-swing" | "shadow-ninja" | "gou-er-3a";
+export type GameId = "three-kingdoms-defense" | "worm-front" | "prism-dash" | "rune-peg" | "fate-chamber" | "planet-merge" | "nightfall-survivors" | "iron-front" | "thunder-wing" | "orbit-dash" | "stack-up" | "bamboo-cicada" | "memory-pairs" | "beat-rush" | "hamster-roll" | "gold-miner" | "oil-tycoon" | "minesweeper" | "go" | "guiyang-mahjong" | "zuma" | "perfect-parking" | "moon-swing" | "shadow-ninja" | "gou-er-3a" | "wukong-tiger-engine";
 
 export type GameInfo = {
   id: GameId;
   title: string;
   eyebrow: string;
   description: string;
-  category: "射击" | "反应" | "益智" | "治愈" | "音乐" | "经营" | "策略";
+  category: "射击" | "动作" | "反应" | "益智" | "治愈" | "音乐" | "经营" | "策略";
   players: string;
   duration: string;
   accent: string;
-  art: "threeKingdoms" | "worm" | "prism" | "peg" | "chamber" | "planetMerge" | "nightfall" | "iron" | "thunder" | "orbit" | "stack" | "bambooCicada" | "memory" | "beat" | "hamster" | "miner" | "oil" | "minesweeper" | "go" | "mahjong" | "zuma" | "parking" | "moon" | "shadowNinja" | "gouEr";
+  art: "threeKingdoms" | "worm" | "prism" | "peg" | "chamber" | "planetMerge" | "nightfall" | "iron" | "thunder" | "orbit" | "stack" | "bambooCicada" | "memory" | "beat" | "hamster" | "miner" | "oil" | "minesweeper" | "go" | "mahjong" | "zuma" | "parking" | "moon" | "shadowNinja" | "gouEr" | "wukong";
   controls: string;
 };
 
@@ -37,6 +37,18 @@ export const games: GameInfo[] = [
     accent: "#d9a35c",
     art: "gouEr",
     controls: "WASD 移动，鼠标视角，左键开火、右键瞄准，R 换弹，按住 E 切断中继，Space 跳跃，Shift 冲刺，C 蹲伏，Esc 暂停；支持触屏与手柄",
+  },
+  {
+    id: "wukong-tiger-engine",
+    title: "黑神话：悟空 · 虎先锋",
+    eyebrow: "3D Boss 战 · 同人",
+    description: "踏入卧虎寺，用棍法、闪身与法术迎战虎先锋；识破连招、积攒棍势，击破这场硬仗。",
+    category: "动作",
+    players: "NEW",
+    duration: "3–10 分钟",
+    accent: "#c74b3a",
+    art: "wukong",
+    controls: "WASD 移动，Shift 疾跑，空格闪身，左键轻棍、右键重棍，Z/X/C 切换棍势，1/2/4 法术，Q 锁定，R 喝葫芦，Esc 暂停；支持触屏",
   },
   {
     id: "worm-front",

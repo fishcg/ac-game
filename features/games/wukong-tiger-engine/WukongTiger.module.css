@@ -1,0 +1,141 @@
+.stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #050504;
+}
+
+.frame {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #050504;
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(110% 80% at 50% 42%, #24170f 0%, #0d0b08 58%, #050504 100%);
+  transition: opacity 0.45s ease, visibility 0.45s ease;
+}
+
+.loading[data-hidden="true"] {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.loadingInner {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  color: #d8c39a;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 5px;
+  border: 1px solid #8d6a3d66;
+  border-top-color: #d8a35c;
+  border-radius: 50%;
+  animation: wukong-spin 1.05s linear infinite;
+}
+
+.loadingText {
+  font-size: 11px;
+  letter-spacing: 0.32em;
+}
+
+.loadingSub {
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  color: #8d7a5f;
+}
+
+.score {
+  position: absolute;
+  top: 24px;
+  left: 12px;
+  z-index: 4;
+  min-width: 196px;
+  padding: 10px 14px 11px;
+  border: 1px solid #c74b3a55;
+  border-left: 3px solid #c74b3a;
+  background: linear-gradient(135deg, #120d09f2, #120d09c9);
+  box-shadow: 0 14px 34px #00000059;
+  color: #ecdfc4;
+  pointer-events: none;
+}
+
+.scoreLabel {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  color: #c9a86a;
+}
+
+.scoreValue {
+  display: block;
+  font-family: Georgia, "Songti SC", serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: #f1dfb9;
+}
+
+.scoreMeta {
+  display: block;
+  margin-top: 3px;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  color: #a2957e;
+}
+
+.scoreBest {
+  display: block;
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid #c9a86a2e;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: #c9a86a;
+}
+
+@keyframes wukong-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .score {
+    top: 8px;
+    left: 8px;
+    min-width: 160px;
+    padding: 8px 10px;
+  }
+
+  .scoreValue {
+    font-size: 22px;
+  }
+
+  .loadingText {
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.2s;
+  }
+}

@@ -176,3 +176,26 @@ a { color: inherit; text-decoration: none; }
 .game-art--compact .gouer-art-code{font-size:7px;letter-spacing:.2em}
 .game-modal__frame--fullscreen{position:fixed;inset:0;width:auto;height:auto}
 .featured-game .gouer-art-code{display:none}
+.game-art--wukong{background:radial-gradient(circle at 74% 16%,#a93b2a45,transparent 32%),radial-gradient(circle at 42% 62%,#c74b3a2b,transparent 46%),linear-gradient(160deg,#241a11 0%,#100d09 48%,#050605 100%);isolation:isolate}
+.game-art--wukong .art-grid{opacity:.1;background-size:42px 42px}
+.game-art--wukong::after{content:"";position:absolute;z-index:9;inset:0;background:radial-gradient(circle at 46% 44%,transparent 40%,#05050473 100%);pointer-events:none}
+.wukong-art-moon{position:absolute;z-index:2;right:13%;top:11%;width:66px;height:66px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#ffe2ad,#d99a52 46%,#8f3b25 100%);box-shadow:0 0 36px #c34a2a66,inset -8px -8px 18px #5a2113aa}
+.wukong-art-mountain{position:absolute;z-index:1;bottom:0;height:42%;background:linear-gradient(180deg,#241b12,#0a0908 72%);opacity:.95}
+.wukong-art-mountain.wm-a{left:-4%;width:62%;clip-path:polygon(0 100%,0 56%,13% 44%,24% 50%,38% 28%,49% 36%,62% 18%,76% 40%,88% 34%,100% 52%,100% 100%)}
+.wukong-art-mountain.wm-b{right:-6%;width:58%;clip-path:polygon(0 100%,0 60%,14% 48%,27% 58%,42% 30%,54% 42%,68% 24%,82% 46%,92% 38%,100% 50%,100% 100%);opacity:.7}
+.wukong-art-gate{position:absolute;z-index:3;left:23%;bottom:8%;width:54%;height:36%;background:linear-gradient(180deg,#544026 0 13%,#19140d 14% 100%);clip-path:polygon(0 13%,50% 0,100% 13%,93% 19%,93% 100%,7% 100%,7% 19%);box-shadow:0 -10px 38px #c74b3a33}
+.wukong-art-gate::before{content:"";position:absolute;left:8%;right:8%;top:20%;height:3px;background:#8b6739a6;box-shadow:0 0 8px #c74b3a55}
+.wukong-art-gate::after{content:"";position:absolute;inset:24% 10% 0;background:linear-gradient(90deg,#0a0907 0 13%,transparent 13% 39%,#0a0907 39% 47%,transparent 47% 53%,#0a0907 53% 61%,transparent 61% 87%,#0a0907 87% 100%);opacity:.95}
+.wukong-art-tiger{position:absolute;z-index:4;filter:drop-shadow(0 0 14px #c74b3a4d);left:8%;bottom:-3%;width:54%;height:60%;background:linear-gradient(155deg,#6f502e 0%,#2a2014 50%,#0d0b08 100%);clip-path:polygon(50% 0,58% 6%,68% 4%,73% 14%,86% 18%,84% 30%,97% 40%,89% 52%,94% 66%,80% 70%,76% 84%,64% 82%,58% 100%,42% 100%,36% 82%,24% 84%,20% 70%,6% 66%,11% 52%,3% 40%,16% 30%,14% 18%,27% 14%,32% 4%,42% 6%)}
+.wukong-art-eye{position:absolute;z-index:5;top:42%;width:8%;height:3.4%;border-radius:50%;background:#efb45d;box-shadow:0 0 12px #efb45d,0 0 24px #c74b3a66;transform:rotate(-7deg)}
+.wukong-art-eye.we-l{left:25%}
+.wukong-art-eye.we-r{left:47%;transform:rotate(7deg)}
+.wukong-art-staff{position:absolute;z-index:6;right:2%;bottom:17%;width:66%;height:3px;background:linear-gradient(90deg,#6e4a2380,#e0b46a 30% 72%,#6e4a2380);transform:rotate(-31deg);transform-origin:100% 50%;box-shadow:0 0 10px #d8a35c4d}
+.wukong-art-staff::after{content:"";position:absolute;left:-7px;top:-4px;width:10px;height:11px;background:#b3261a;clip-path:polygon(0 50%,100% 0,76% 100%)}
+.wukong-art-code{position:absolute;z-index:10;left:6%;bottom:7%;font-size:8px;font-weight:500;letter-spacing:.26em;color:#c9a86a99;font-style:normal}
+.wukong-art-seal{position:absolute;z-index:10;right:6%;bottom:6%;display:grid;place-items:center;width:38px;height:38px;border:1px solid #c74b3a99;background:#0b0806e6;color:#e07a5f;font-style:normal;font-family:Georgia,"Songti SC",serif;font-size:15px;letter-spacing:.04em;box-shadow:inset 0 0 0 3px #0b0806,inset 0 0 0 4px #c74b3a4d,0 0 14px #c74b3a22;transform:rotate(-3deg)}
+.game-art--compact .wukong-art-moon{width:45px;height:45px;right:10%;top:10%}
+.game-art--compact .wukong-art-tiger{height:64%;bottom:-4%}
+.game-art--compact .wukong-art-gate{height:38%}
+.game-art--compact .wukong-art-seal{width:30px;height:30px;font-size:12px;right:6%}
+.game-art--compact .wukong-art-code{font-size:6.5px;letter-spacing:.18em}
